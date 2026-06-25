@@ -1,0 +1,81 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check-tag:
+    name: validate tag
+    runs-on: ubuntu-24.04
+    outputs:
+      npm_tag: ${{ steps.validate.outputs.npm_tag }}
+      package_version: ${{ steps.validate.outputs.package_version }}
+      prerelease: ${{ steps.validate.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.0
+
+      - name: Validate npm release tag
+        id: validate
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: node .github/scripts/validate-release-tag.mjs
+
+  verify:
+    name: verify
+    needs: check-tag
+    uses: ./.github/workflows/ci.yml
+
+  publish-npm:
+    name: publish to npm
+    needs: [check-tag, verify]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NPM_TAG: ${{ needs.check-tag.outputs.npm_tag }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.3
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify npm package contents
+        run: pnpm pack --dry-run
+
+      - name: Publish package
+        run: npm publish --access public --tag "$NPM_TAG"
+
+  github-release:
+    name: create GitHub Release
+    needs: [check-tag, publish-npm]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          prerelease: ${{ needs.check-tag.outputs.prerelease == 'true' }}

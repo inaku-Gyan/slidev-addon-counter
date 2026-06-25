@@ -12,13 +12,13 @@
     "counter",
     "toc"
   ],
-  "homepage": "https://github.com/inaku/slidev-addon-counter#readme",
+  "homepage": "https://github.com/inaku-Gyan/slidev-addon-counter#readme",
   "bugs": {
-    "url": "https://github.com/inaku/slidev-addon-counter/issues"
+    "url": "https://github.com/inaku-Gyan/slidev-addon-counter/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inaku/slidev-addon-counter.git"
+    "url": "git+https://github.com/inaku-Gyan/slidev-addon-counter.git"
   },
   "engines": {
     "node": ">=24.18.0",
