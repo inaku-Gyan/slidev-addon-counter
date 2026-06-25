@@ -1,0 +1,15 @@
+.slidev-addon-counter-demo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+.slidev-addon-counter-demo__number {
+  color: var(--slidev-theme-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.slidev-addon-counter-demo__title {
+  font-weight: 600;
+}
