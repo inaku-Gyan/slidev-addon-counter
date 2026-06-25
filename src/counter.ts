@@ -1,3 +1,6 @@
+import { parseDocument } from "htmlparser2";
+import MarkdownIt from "markdown-it";
+
 export type CounterStyle =
   | "decimal"
   | "zero"
@@ -76,6 +79,20 @@ interface RenderContext {
   stack: number[];
 }
 
+interface CounterTagMatch {
+  component: string;
+  attrs: Record<string, string>;
+  index: number;
+}
+
+interface HtmlNode {
+  type?: string;
+  name?: string;
+  attribs?: Record<string, string>;
+  children?: HtmlNode[];
+  startIndex?: number | null;
+}
+
 const BUILTIN_STYLES = new Set<CounterStyle>([
   "decimal",
   "zero",
@@ -89,6 +106,13 @@ const BUILTIN_STYLES = new Set<CounterStyle>([
 const BUILTIN_RESETS = new Set<CounterReset>(["lower", "none"]);
 const BUILTIN_PLACEHOLDER_KINDS = new Set(["value", "raw", "full"]);
 const PLACEHOLDER_RE = /%\{([^}]*)\}/g;
+const COUNTER_COMPONENTS = new Set([
+  "Counter",
+  "CounterStep",
+  "CounterIncrement",
+  "CounterDisplay",
+]);
+const markdownIt = new MarkdownIt({ html: true });
 
 export function defineCounterConfig<T extends CounterConfig>(config: T): T {
   return config;
@@ -332,8 +356,8 @@ export function extractCounterOperations(
 ): CounterOperation[] {
   const operations: CounterOperation[] = [];
 
-  for (const match of content.matchAll(COUNTER_TAG_RE)) {
-    const [, component, attrs = ""] = match;
+  for (const match of findCounterTags(content)) {
+    const { component, attrs } = match;
     const id =
       readStringAttribute(attrs, "op") ??
       getCounterOperationId(slideNo, operations.length);
@@ -372,27 +396,114 @@ export function injectCounterOperationIds(
   const edits: Array<{ index: number; value: string }> = [];
   let order = 0;
 
-  for (const match of content.matchAll(COUNTER_TAG_RE)) {
-    const [tag, component, attrs = ""] = match;
-    if (/\sop\s*=/.test(attrs)) {
+  for (const match of findCounterTags(content)) {
+    if (readStringAttribute(match.attrs, "op") != null) {
       order += 1;
       continue;
     }
 
     edits.push({
-      index: match.index + 1 + component.length,
+      index: match.index + 1 + match.component.length,
       value: ` op="${getCounterOperationId(slideNo, order)}"`,
     });
     order += 1;
-
-    if (tag.includes("\n")) {
-      throw new Error(
-        `<${component}> on slide ${slideNo} must keep its opening tag on one line.`,
-      );
-    }
   }
 
   return edits;
+}
+
+function findCounterTags(content: string): CounterTagMatch[] {
+  const lineOffsets = getLineOffsets(content);
+  const tags: CounterTagMatch[] = [];
+
+  for (const token of markdownIt.parse(content, {})) {
+    if (token.type === "html_block" && token.map) {
+      const baseIndex = lineOffsets[token.map[0]] ?? 0;
+      tags.push(...parseCounterTagsFromHtml(token.content, baseIndex));
+      continue;
+    }
+
+    if (token.type === "inline" && token.map && token.children) {
+      const segmentStart = lineOffsets[token.map[0]] ?? 0;
+      const segmentEnd = lineOffsets[token.map[1]] ?? content.length;
+      const segment = content.slice(segmentStart, segmentEnd);
+      let cursor = 0;
+
+      for (const child of token.children) {
+        if (child.type !== "html_inline") {
+          continue;
+        }
+
+        const relativeIndex = segment.indexOf(child.content, cursor);
+        if (relativeIndex < 0) {
+          continue;
+        }
+
+        tags.push(
+          ...parseCounterTagsFromHtml(
+            child.content,
+            segmentStart + relativeIndex,
+          ),
+        );
+        cursor = relativeIndex + child.content.length;
+      }
+    }
+  }
+
+  return tags.sort((a, b) => a.index - b.index);
+}
+
+function parseCounterTagsFromHtml(
+  html: string,
+  baseIndex: number,
+): CounterTagMatch[] {
+  const document = parseDocument(html, {
+    lowerCaseAttributeNames: false,
+    lowerCaseTags: false,
+    withStartIndices: true,
+  });
+  const tags: CounterTagMatch[] = [];
+
+  walkHtmlNodes(document.children as HtmlNode[], (node) => {
+    if (
+      node.type !== "tag" ||
+      !node.name ||
+      !COUNTER_COMPONENTS.has(node.name) ||
+      node.startIndex == null
+    ) {
+      return;
+    }
+
+    tags.push({
+      component: node.name,
+      attrs: node.attribs ?? {},
+      index: baseIndex + node.startIndex,
+    });
+  });
+
+  return tags;
+}
+
+function walkHtmlNodes(
+  nodes: readonly HtmlNode[],
+  visit: (node: HtmlNode) => void,
+): void {
+  for (const node of nodes) {
+    visit(node);
+    if (node.children) {
+      walkHtmlNodes(node.children, visit);
+    }
+  }
+}
+
+function getLineOffsets(content: string): number[] {
+  const offsets = [0];
+  for (let i = 0; i < content.length; i += 1) {
+    if (content[i] === "\n") {
+      offsets.push(i + 1);
+    }
+  }
+  return offsets;
 }
 
 function renderFullLevel(context: RenderContext): string {
@@ -590,23 +701,22 @@ function toCjk(value: number): string {
   return result.replace(/^一十/, "十");
 }
 
-const COUNTER_TAG_RE =
-  /<(Counter|CounterStep|CounterIncrement|CounterDisplay)\b([^<>]*?)(?:\/>|>)/g;
-
-function readStringAttribute(attrs: string, name: string): string | undefined {
-  const match = attrs.match(
-    new RegExp(`(?:^|\\s)${name}\\s*=\\s*["']([^"']+)["']`),
-  );
-  return match?.[1];
+function readStringAttribute(
+  attrs: Record<string, string>,
+  name: string,
+): string | undefined {
+  return attrs[name];
 }
 
-function readLevelAttribute(attrs: string): LevelRef | undefined {
+function readLevelAttribute(
+  attrs: Record<string, string>,
+): LevelRef | undefined {
   const staticLevel = readStringAttribute(attrs, "level");
   if (staticLevel != null) {
     return /^\d+$/.test(staticLevel) ? Number(staticLevel) : staticLevel;
   }
 
-  const boundLevel = attrs.match(/(?:^|\s):level\s*=\s*["']([^"']+)["']/)?.[1];
+  const boundLevel = readStringAttribute(attrs, ":level");
   if (boundLevel == null) {
     return undefined;
   }
