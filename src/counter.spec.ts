@@ -321,9 +321,14 @@ describe("buildCounterTimeline", () => {
 });
 
 describe("counter component scanner", () => {
-  it("extracts operations and injects deterministic ids", () => {
+  it("extracts only real markdown html counter components", () => {
     const content = [
+      "```vue",
+      '<Counter id="ignored" level="chapter" />',
+      "```",
+      '`<Counter id="ignored" level="chapter" />`',
       '<Counter id="section" level="chapter" />',
+      'Text <Counter id="section" level="section" />',
       '<CounterIncrement id="theorem" :level="1" />',
       '<CounterDisplay id="theorem" level="theorem" />',
     ].join("\n");
@@ -337,12 +342,18 @@ describe("counter component scanner", () => {
       },
       {
         id: "counter-s3-o1",
+        counter: "section",
+        level: "section",
+        action: "step",
+      },
+      {
+        id: "counter-s3-o2",
         counter: "theorem",
         level: 1,
         action: "increment",
       },
       {
-        id: "counter-s3-o2",
+        id: "counter-s3-o3",
         counter: "theorem",
         level: "theorem",
         action: "display",
@@ -350,9 +361,10 @@ describe("counter component scanner", () => {
     ]);
 
     expect(injectCounterOperationIds(content, 3)).toEqual([
-      { index: 8, value: ' op="counter-s3-o0"' },
-      { index: 58, value: ' op="counter-s3-o1"' },
-      { index: 101, value: ' op="counter-s3-o2"' },
+      { index: 103, value: ' op="counter-s3-o0"' },
+      { index: 149, value: ' op="counter-s3-o1"' },
+      { index: 199, value: ' op="counter-s3-o2"' },
+      { index: 242, value: ' op="counter-s3-o3"' },
     ]);
   });
 });

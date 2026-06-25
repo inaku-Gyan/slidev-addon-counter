@@ -10,9 +10,15 @@ importers:
       "@slidev/client":
         specifier: ^52.16.0
         version: 52.16.0(@nuxt/kit@3.21.8)(@vue/compiler-sfc@3.5.38)(lightningcss@1.32.0)(rolldown@1.1.2)(vite@8.1.0(@types/node@26.0.0)(jiti@2.7.0)(yaml@2.9.0))
+      htmlparser2:
+        specifier: ^12.0.0
+        version: 12.0.0
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
+      markdown-it:
+        specifier: ^14.2.0
+        version: 14.2.0
     devDependencies:
       "@slidev/cli":
         specifier: ^52.16.0
@@ -20,6 +26,9 @@ importers:
       "@slidev/theme-default":
         specifier: ^0.25.0
         version: 0.25.0
+      "@types/markdown-it":
+        specifier: ^14.1.2
+        version: 14.1.2
       "@types/node":
         specifier: ^26.0.0
         version: 26.0.0
