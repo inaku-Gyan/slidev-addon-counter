@@ -4,12 +4,7 @@ import { pathToFileURL } from "node:url";
 
 import { createJiti } from "jiti";
 
-import {
-  buildCounterTimeline,
-  extractCounterOperations,
-  normalizeCounterConfig,
-  type CounterConfig,
-} from "../src/counter";
+import { type CounterConfig } from "../src/counter";
 
 const CONFIG_FILE = "slidev-addon-counter.config.ts";
 const VIRTUAL_ID = "virtual:slidev-addon-counter/snapshots";
@@ -90,30 +85,13 @@ export default function counterVitePlugins(options: {
 
 async function createSnapshotModule(options: {
   userRoot: string;
-  data: {
-    slides: Array<{
-      index: number;
-      title?: string;
-      source: {
-        content: string;
-      };
-    }>;
-  };
 }): Promise<string> {
   const rawConfig = await loadUserConfig(options.userRoot);
-  const config = normalizeCounterConfig(rawConfig);
-  const operations = options.data.slides.flatMap((slide) =>
-    extractCounterOperations(
-      slide.source.content,
-      slide.index + 1,
-      slide.title,
-    ),
-  );
-  const timeline = buildCounterTimeline(operations, config);
 
   return [
-    `export const snapshots = ${JSON.stringify(timeline.snapshots, null, 2)}`,
-    `export const operations = ${JSON.stringify(timeline.operations, null, 2)}`,
+    `export const counterConfig = ${JSON.stringify(rawConfig ?? {}, null, 2)}`,
+    "export const snapshots = {}",
+    "export const operations = []",
   ].join("\n");
 }
 

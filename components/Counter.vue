@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
-
-import { snapshots } from "virtual:slidev-addon-counter/snapshots";
+import { counterConfig } from "virtual:slidev-addon-counter/snapshots";
+import type { CounterConfig } from "../src/counter";
+import { useRuntimeCounter } from "../src/runtime";
 
 const props = withDefaults(
   defineProps<{
@@ -17,13 +17,15 @@ const props = withDefaults(
   },
 );
 
-const displayText = computed(() => {
-  if (props.action === "increment") {
-    return "";
-  }
-
-  return props.op ? (snapshots[props.op]?.display ?? "") : "";
-});
+const displayText = useRuntimeCounter(
+  () => ({
+    counter: props.id,
+    level: props.level,
+    action: props.action,
+    slideNo: 1,
+  }),
+  counterConfig as CounterConfig,
+);
 </script>
 
 <template>{{ displayText }}</template>

@@ -366,33 +366,10 @@ export function getCounterOperationId(slideNo: number, order: number): string {
 }
 
 export function injectCounterOperationIds(
-  content: string,
-  slideNo: number,
+  _content: string,
+  _slideNo: number,
 ): Array<{ index: number; value: string }> {
-  const edits: Array<{ index: number; value: string }> = [];
-  let order = 0;
-
-  for (const match of content.matchAll(COUNTER_TAG_RE)) {
-    const [tag, component, attrs = ""] = match;
-    if (/\sop\s*=/.test(attrs)) {
-      order += 1;
-      continue;
-    }
-
-    edits.push({
-      index: match.index + 1 + component.length,
-      value: ` op="${getCounterOperationId(slideNo, order)}"`,
-    });
-    order += 1;
-
-    if (tag.includes("\n")) {
-      throw new Error(
-        `<${component}> on slide ${slideNo} must keep its opening tag on one line.`,
-      );
-    }
-  }
-
-  return edits;
+  return [];
 }
 
 function renderFullLevel(context: RenderContext): string {

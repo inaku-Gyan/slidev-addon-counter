@@ -28,6 +28,7 @@
     "components",
     "config.ts",
     "src/counter.ts",
+    "src/runtime.ts",
     "setup",
     "README.md",
     "LICENSE"

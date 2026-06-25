@@ -32,6 +32,7 @@ declare module "virtual:slidev-addon-counter/snapshots" {
     display: string;
   }
 
+  export const counterConfig: unknown;
   export const snapshots: Record<string, CounterSnapshot>;
   export const operations: CounterOperation[];
 }

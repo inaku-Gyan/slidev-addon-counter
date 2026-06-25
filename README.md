@@ -2,6 +2,12 @@
 
 LaTeX-like multi-level counters for Slidev.
 
+> Runtime registry experiment: this branch avoids source scanning by registering
+> real `<Counter>` component instances at runtime. It fixes code-block false
+> positives, but first render order across preview/overview/export can still
+> make cross-slide numbering unstable. This prototype currently orders by
+> component registration order, not by original slide source order.
+
 ## Usage
 
 Enable the addon in your Slidev deck:

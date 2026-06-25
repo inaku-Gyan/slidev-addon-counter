@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildCounterTimeline,
-  extractCounterOperations,
   formatCounterValue,
   getCounterDefinition,
   injectCounterOperationIds,
@@ -320,39 +319,17 @@ describe("buildCounterTimeline", () => {
   });
 });
 
-describe("counter component scanner", () => {
-  it("extracts operations and injects deterministic ids", () => {
+describe("runtime counter registry experiment", () => {
+  it("does not inject operation ids into markdown source", () => {
     const content = [
+      "```vue",
       '<Counter id="section" level="chapter" />',
+      "```",
+      '`<Counter id="section" level="chapter" />`',
       '<CounterIncrement id="theorem" :level="1" />',
       '<CounterDisplay id="theorem" level="theorem" />',
     ].join("\n");
 
-    expect(extractCounterOperations(content, 3, "Title")).toMatchObject([
-      {
-        id: "counter-s3-o0",
-        counter: "section",
-        level: "chapter",
-        action: "step",
-      },
-      {
-        id: "counter-s3-o1",
-        counter: "theorem",
-        level: 1,
-        action: "increment",
-      },
-      {
-        id: "counter-s3-o2",
-        counter: "theorem",
-        level: "theorem",
-        action: "display",
-      },
-    ]);
-
-    expect(injectCounterOperationIds(content, 3)).toEqual([
-      { index: 8, value: ' op="counter-s3-o0"' },
-      { index: 58, value: ' op="counter-s3-o1"' },
-      { index: 101, value: ' op="counter-s3-o2"' },
-    ]);
+    expect(injectCounterOperationIds(content, 3)).toEqual([]);
   });
 });
