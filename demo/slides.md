@@ -16,152 +16,121 @@ components, and Slidev layouts.
 
 # Basic section counter
 
-Source
-
-```md
-Chapter <Counter id="section" level="chapter" />
-<br>
-Section <Counter id="section" level="section" />
-<br>
-Section <Counter id="section" level="section" />
-<br>
-Chapter <Counter id="section" level="chapter" />
-<br>
-Section <Counter id="section" level="section" />
+```vue
+<Counter id="section" level="chapter" />
 ```
 
-Rendered
+<Counter id="section" level="chapter" />
 
-<div class="text-xl leading-10">
-  Chapter <Counter id="section" level="chapter" />
-  <br />
-  Section <Counter id="section" level="section" />
-  <br />
-  Section <Counter id="section" level="section" />
-  <br />
-  Chapter <Counter id="section" level="chapter" />
-  <br />
-  Section <Counter id="section" level="section" />
-</div>
+```vue
+<Counter id="section" level="section" />
+```
+
+<Counter id="section" level="section" />
+
+```vue
+<Counter id="section" level="section" />
+```
+
+<Counter id="section" level="section" />
+
+```vue
+<Counter id="section" level="chapter" />
+```
+
+<Counter id="section" level="chapter" />
+
+```vue
+<Counter id="section" level="section" />
+```
+
+<Counter id="section" level="section" />
 
 ---
 
 # Alias and numeric levels
 
-Source
-
-```md
+```vue
 <CounterStep id="section" level="chapter" />
+```
+
+<CounterStep id="section" level="chapter" />
+
+```vue
+<CounterStep id="section" level="section" />
+```
 
 <CounterStep id="section" level="section" />
 
+```vue
 <CounterStep id="section" :level="2" />
 ```
 
-Rendered
-
-<div class="space-y-3 text-2xl">
-  <div><CounterStep id="section" level="chapter" /></div>
-  <div><CounterStep id="section" level="section" /></div>
-  <div><CounterStep id="section" :level="2" /></div>
-</div>
+<CounterStep id="section" :level="2" />
 
 ---
 
 # Step, increment, display
 
-Source
+```vue
+<CounterStep id="theorem" level="theorem" />
+```
 
-```md
-Visible theorem:
 <CounterStep id="theorem" level="theorem" />
 
-Hidden theorem:
+```vue
 <CounterIncrement id="theorem" level="theorem" />
+```
 
-Latest theorem:
+<CounterIncrement id="theorem" level="theorem" /> No text is rendered here.
+
+```vue
 <CounterDisplay id="theorem" level="theorem" />
 ```
 
-Rendered
-
-<div class="space-y-4 text-xl">
-  <p>
-    Visible theorem:
-    <strong><CounterStep id="theorem" level="theorem" /></strong>
-  </p>
-
-  <p>
-    Hidden theorem:
-    <CounterIncrement id="theorem" level="theorem" />
-    <span class="opacity-60">(no text is rendered here)</span>
-  </p>
-
-  <p>
-    Latest theorem:
-    <strong><CounterDisplay id="theorem" level="theorem" /></strong>
-  </p>
-</div>
+<CounterDisplay id="theorem" level="theorem" />
 
 ---
 
 # Independent counters
 
-Source
-
-```md
-Section:
-<CounterStep id="section" level="section" />
-
-Theorem:
-<CounterStep id="theorem" level="theorem" />
-
-Section again:
+```vue
 <CounterStep id="section" level="section" />
 ```
 
-Rendered
+Section: <CounterStep id="section" level="section" />
 
-<div class="space-y-4 text-xl">
-  <p>
-    Section:
-    <strong><CounterStep id="section" level="section" /></strong>
-  </p>
+```vue
+<CounterStep id="theorem" level="theorem" />
+```
 
-  <p>
-    Theorem:
-    <strong><CounterStep id="theorem" level="theorem" /></strong>
-  </p>
+Theorem: <CounterStep id="theorem" level="theorem" />
 
-  <p>
-    Section again:
-    <strong><CounterStep id="section" level="section" /></strong>
-  </p>
-</div>
+```vue
+<CounterStep id="section" level="section" />
+```
+
+Section again: <CounterStep id="section" level="section" />
 
 ---
 
 # Markdown heading composition
 
-Source
-
 ```md
 # <CounterStep id="section" level="chapter" /> Timers
-
-## <CounterStep id="section" level="section" /> SysTick
 ```
 
-Rendered
-
 # <CounterStep id="section" level="chapter" /> Timers
+
+```md
+## <CounterStep id="section" level="section" /> SysTick
+```
 
 ## <CounterStep id="section" level="section" /> SysTick
 
 ---
 
 # Styled plain text
-
-Source
 
 ```md
 <span class="text-sky-600 font-bold">
@@ -170,56 +139,36 @@ Source
 HAL_Delay
 ```
 
-Rendered
-
-<p class="text-2xl">
-  <span class="text-sky-600 font-bold">
-    <CounterStep id="section" level="section" />
-  </span>
-  HAL_Delay
-</p>
+<span class="text-sky-600 font-bold">
+  <CounterStep id="section" level="section" />
+</span>
+HAL_Delay
 
 ---
 
 # Code samples are just code
 
-Source
-
 ````md
-Before:
-<CounterDisplay id="section" level="section" />
+Before: <CounterDisplay id="section" level="section" />
 
 ```vue
 <Counter id="section" level="section" />
 ```
 
-After:
-<CounterDisplay id="section" level="section" />
+After: <CounterDisplay id="section" level="section" />
 ````
 
-Rendered
-
-<div class="space-y-4 text-xl">
-  <p>
-    Before:
-    <strong><CounterDisplay id="section" level="section" /></strong>
-  </p>
+Before: <CounterDisplay id="section" level="section" />
 
 ```vue
 <Counter id="section" level="section" />
 ```
 
-  <p>
-    After:
-    <strong><CounterDisplay id="section" level="section" /></strong>
-  </p>
-</div>
+After: <CounterDisplay id="section" level="section" />
 
 ---
 
 # Config used by this demo
-
-Source
 
 ```ts
 export default defineCounterConfig({
@@ -251,21 +200,8 @@ export default defineCounterConfig({
 });
 ```
 
-Rendered formats
+Chapter: <CounterStep id="section" level="chapter" />
 
-<div class="grid grid-cols-3 gap-6 text-xl">
-  <div>
-    <div class="text-sm uppercase tracking-wide opacity-60">chapter</div>
-    <div class="text-3xl font-bold"><CounterStep id="section" level="chapter" /></div>
-  </div>
+Section: <CounterStep id="section" level="section" />
 
-  <div>
-    <div class="text-sm uppercase tracking-wide opacity-60">section</div>
-    <div class="text-3xl font-bold"><CounterStep id="section" level="section" /></div>
-  </div>
-
-  <div>
-    <div class="text-sm uppercase tracking-wide opacity-60">theorem</div>
-    <div class="text-3xl font-bold"><CounterStep id="theorem" level="theorem" /></div>
-  </div>
-</div>
+Theorem: <CounterStep id="theorem" level="theorem" />
