@@ -24,6 +24,17 @@ publishing.
 Publishing uses npm Trusted Publishing with GitHub Actions OIDC. Do not add a
 long-lived `NPM_TOKEN` unless Trusted Publishing must be replaced later.
 
+`package.json` also pins npm publishing to the official registry:
+
+```json
+"publishConfig": {
+  "access": "public",
+  "registry": "https://registry.npmjs.org/"
+}
+```
+
+This prevents local publish attempts from accidentally using a mirror registry.
+
 Configure npm Trusted Publishing for:
 
 - Package: `slidev-addon-counter`
@@ -72,6 +83,10 @@ Users can install a prerelease with:
 ```bash
 pnpm add slidev-addon-counter@beta
 ```
+
+For the first public validation release, use `0.1.0-alpha.0`, which publishes
+to the `alpha` dist-tag and does not affect users installing the default
+`latest` tag.
 
 ## GitHub Release
 

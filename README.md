@@ -4,6 +4,18 @@ LaTeX-like multi-level counters for Slidev.
 
 ## Usage
 
+Install the addon:
+
+```bash
+pnpm add -D slidev-addon-counter
+```
+
+For prerelease versions, install the matching dist-tag:
+
+```bash
+pnpm add -D slidev-addon-counter@alpha
+```
+
 Enable the addon in your Slidev deck:
 
 ```md
