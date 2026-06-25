@@ -14,7 +14,6 @@ components, and Slidev layouts.
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Basic section counter
@@ -24,30 +23,33 @@ layoutClass: counter-demo-two-cols
 Source
 
 ```md
-<Counter id="section" level="chapter" />
-
-<Counter id="section" level="section" /> RTOS basics
-
-# <Counter id="section" level="section" /> Task scheduling
+Chapter <Counter id="section" level="chapter" />
+<br>
+Section <Counter id="section" level="section" />
+<br>
+Section <Counter id="section" level="section" />
+<br>
+Chapter <Counter id="section" level="chapter" />
+<br>
+Section <Counter id="section" level="section" />
 ```
 
 ::right::
 
 Rendered
 
-<div class="text-3xl font-bold mb-8">
-  <Counter id="section" level="chapter" />
-</div>
-
-<div class="text-xl mb-4">
-  <Counter id="section" level="section" /> RTOS basics
-</div>
-
-# <Counter id="section" level="section" /> Task scheduling
+Chapter <Counter id="section" level="chapter" />
+<br>
+Section <Counter id="section" level="section" />
+<br>
+Section <Counter id="section" level="section" />
+<br>
+Chapter <Counter id="section" level="chapter" />
+<br>
+Section <Counter id="section" level="section" />
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Alias and numeric levels
@@ -76,7 +78,6 @@ Rendered
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Step, increment, display
@@ -120,7 +121,6 @@ Rendered
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Independent counters
@@ -163,7 +163,6 @@ Rendered
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Plain text composition
@@ -173,34 +172,31 @@ layoutClass: counter-demo-two-cols
 Source
 
 ```md
-# <CounterStep id="section" level="chapter" /> Timers
-
-## <CounterStep id="section" level="section" /> SysTick
+## <CounterStep id="section" level="chapter" /> Timers
 
 <span class="text-sky-600 font-bold">
   <CounterStep id="section" level="section" />
 </span>
- HAL_Delay
+ SysTick
 ```
 
 ::right::
 
 Rendered
 
-# <CounterStep id="section" level="chapter" /> Timers
-
-## <CounterStep id="section" level="section" /> SysTick
+<h2 class="text-3xl font-bold mb-8">
+  <CounterStep id="section" level="chapter" /> Timers
+</h2>
 
 <p class="text-2xl">
   <span class="text-sky-600 font-bold">
     <CounterStep id="section" level="section" />
   </span>
-  HAL_Delay
+  SysTick
 </p>
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Code samples are just code
@@ -243,7 +239,6 @@ Rendered
 
 ---
 layout: two-cols-header
-layoutClass: counter-demo-two-cols
 ---
 
 # Config used by this demo
@@ -302,34 +297,3 @@ Rendered formats
     <div class="text-3xl font-bold"><CounterStep id="theorem" level="theorem" /></div>
   </div>
 </div>
-
-<style>
-.counter-demo-two-cols {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 3rem;
-}
-
-.counter-demo-two-cols .col-left,
-.counter-demo-two-cols .col-right {
-  min-width: 0;
-}
-
-.counter-demo-two-cols .col-left {
-  padding-right: 0.5rem;
-}
-
-.counter-demo-two-cols .col-right {
-  padding-left: 1rem;
-  border-left: 1px solid rgb(148 163 184 / 0.28);
-}
-
-.counter-demo-two-cols .slidev-code-wrapper,
-.counter-demo-two-cols pre {
-  max-width: 100%;
-}
-
-.counter-demo-two-cols pre code {
-  font-size: 0.72rem;
-  line-height: 1.38;
-}
-</style>
