@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, normalize } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { createJiti } from "jiti";
@@ -19,19 +19,56 @@ const DIRECT_VIRTUAL_PATHS = [
   "/@slidev-addon-counter/snapshots",
 ];
 
-export default function counterVitePlugins(options: {
+interface CounterPluginOptions {
   userRoot: string;
   data: {
-    slides: Array<{
-      index: number;
-      title?: string;
-      source: {
-        content: string;
-        filepath: string;
-      };
-    }>;
+    slides: SlideSource[];
   };
-}) {
+}
+
+interface SlideSource {
+  index: number;
+  title?: string;
+  source: {
+    content: string;
+    filepath: string;
+  };
+}
+
+interface ViteDevServerLike {
+  middlewares: {
+    use: (
+      handler: (
+        req: { url?: string },
+        res: {
+          end: (chunk?: string) => void;
+          setHeader: (name: string, value: string) => void;
+          statusCode: number;
+        },
+        next: (error?: unknown) => void,
+      ) => void,
+    ) => void;
+  };
+  moduleGraph: {
+    getModuleById: (id: string) => unknown;
+    getModuleByUrl?: (url: string) => Promise<unknown>;
+    invalidateModule: (module: unknown) => void;
+  };
+  watcher: {
+    add: (path: string | string[]) => void;
+  };
+  ws: {
+    send: (payload: {
+      path?: string;
+      timestamp?: number;
+      type: string;
+    }) => void;
+  };
+}
+
+export default function counterVitePlugins(
+  options: CounterPluginOptions,
+): unknown[] {
   return [
     {
       name: "slidev-addon-counter",
@@ -47,21 +84,9 @@ export default function counterVitePlugins(options: {
       resolveId(id: string) {
         return id === VIRTUAL_ID ? RESOLVED_VIRTUAL_ID : undefined;
       },
-      configureServer(server: {
-        middlewares: {
-          use: (
-            handler: (
-              req: { url?: string },
-              res: {
-                end: (chunk?: string) => void;
-                setHeader: (name: string, value: string) => void;
-                statusCode: number;
-              },
-              next: (error?: unknown) => void,
-            ) => void,
-          ) => void;
-        };
-      }) {
+      configureServer(server: ViteDevServerLike) {
+        watchCounterDependencies(server, options);
+
         server.middlewares.use((req, res, next) => {
           if (!isDirectVirtualRequest(req.url)) {
             next();
@@ -84,22 +109,27 @@ export default function counterVitePlugins(options: {
 
         return createSnapshotModule(options);
       },
+      async handleHotUpdate(ctx: { file: string; server: ViteDevServerLike }) {
+        if (!isCounterDependency(ctx.file, options)) {
+          return undefined;
+        }
+
+        await invalidateSnapshotModule(ctx.server);
+        ctx.server.ws.send({
+          type: "full-reload",
+          path: "*",
+          timestamp: Date.now(),
+        });
+
+        return [];
+      },
     },
   ];
 }
 
-async function createSnapshotModule(options: {
-  userRoot: string;
-  data: {
-    slides: Array<{
-      index: number;
-      title?: string;
-      source: {
-        content: string;
-      };
-    }>;
-  };
-}): Promise<string> {
+async function createSnapshotModule(
+  options: CounterPluginOptions,
+): Promise<string> {
   const rawConfig = await loadUserConfig(options.userRoot);
   const config = normalizeCounterConfig(rawConfig);
   const operations = options.data.slides.flatMap((slide) =>
@@ -115,6 +145,37 @@ async function createSnapshotModule(options: {
     `export const snapshots = ${JSON.stringify(timeline.snapshots, null, 2)}`,
     `export const operations = ${JSON.stringify(timeline.operations, null, 2)}`,
   ].join("\n");
+}
+
+function watchCounterDependencies(
+  server: ViteDevServerLike,
+  options: CounterPluginOptions,
+): void {
+  const configPath = getConfigPath(options.userRoot);
+  const paths = [
+    ...(configPath ? [configPath] : []),
+    ...options.data.slides.map((slide) => slide.source.filepath),
+  ];
+
+  server.watcher.add([...new Set(paths)]);
+}
+
+async function invalidateSnapshotModule(
+  server: ViteDevServerLike,
+): Promise<void> {
+  const modules = [
+    server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID),
+    server.moduleGraph.getModuleById(VIRTUAL_ID),
+    ...(await Promise.all(
+      DIRECT_VIRTUAL_PATHS.map((path) =>
+        server.moduleGraph.getModuleByUrl?.(path),
+      ),
+    )),
+  ].filter((module): module is object => Boolean(module));
+
+  for (const module of modules) {
+    server.moduleGraph.invalidateModule(module);
+  }
 }
 
 async function loadUserConfig(
@@ -144,4 +205,19 @@ function isDirectVirtualRequest(url: string | undefined): boolean {
 
   const pathname = url.split("?", 1)[0];
   return DIRECT_VIRTUAL_PATHS.includes(pathname);
+}
+
+function isCounterDependency(
+  file: string,
+  options: CounterPluginOptions,
+): boolean {
+  const normalizedFile = normalize(file);
+  const configPath = getConfigPath(options.userRoot);
+  if (configPath && normalize(configPath) === normalizedFile) {
+    return true;
+  }
+
+  return options.data.slides.some(
+    (slide) => normalize(slide.source.filepath) === normalizedFile,
+  );
 }
