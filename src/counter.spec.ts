@@ -323,9 +323,9 @@ describe("buildCounterTimeline", () => {
 describe("counter component scanner", () => {
   it("extracts operations and injects deterministic ids", () => {
     const content = [
-      '<Counter counter="section" level="chapter" />',
-      '<CounterIncrement counter="theorem" :level="1" />',
-      '<CounterDisplay counter="theorem" level="theorem" />',
+      '<Counter id="section" level="chapter" />',
+      '<CounterIncrement id="theorem" :level="1" />',
+      '<CounterDisplay id="theorem" level="theorem" />',
     ].join("\n");
 
     expect(extractCounterOperations(content, 3, "Title")).toMatchObject([
@@ -351,8 +351,8 @@ describe("counter component scanner", () => {
 
     expect(injectCounterOperationIds(content, 3)).toEqual([
       { index: 8, value: ' op="counter-s3-o0"' },
-      { index: 63, value: ' op="counter-s3-o1"' },
-      { index: 111, value: ' op="counter-s3-o2"' },
+      { index: 58, value: ' op="counter-s3-o1"' },
+      { index: 101, value: ' op="counter-s3-o2"' },
     ]);
   });
 });

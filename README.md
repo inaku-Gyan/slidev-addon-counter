@@ -43,12 +43,12 @@ export default defineCounterConfig({
 Use counters in slides:
 
 ```md
-<Counter counter="section" level="chapter" />
+<Counter id="section" level="chapter" />
 
-<Counter counter="section" level="section" />
+<Counter id="section" level="section" />
 
-<CounterIncrement counter="theorem" level="theorem" />
-<CounterDisplay counter="theorem" level="theorem" />
+<CounterIncrement id="theorem" level="theorem" />
+<CounterDisplay id="theorem" level="theorem" />
 ```
 
 `action="step"` increments and displays, `action="increment"` only increments,
@@ -59,7 +59,7 @@ wrap it yourself:
 
 ```md
 <span class="text-red-500">
-  <Counter counter="section" level="section" />
+  <Counter id="section" level="section" />
 </span>
 ```
 

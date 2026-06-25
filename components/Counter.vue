@@ -6,13 +6,13 @@ import { snapshots } from "virtual:slidev-addon-counter/snapshots";
 const props = withDefaults(
   defineProps<{
     action?: "step" | "increment" | "display";
-    counter?: string;
+    id?: string;
     level: number | string;
     op?: string;
   }>(),
   {
     action: "step",
-    counter: "default",
+    id: "default",
     op: "",
   },
 );

@@ -337,7 +337,7 @@ export function extractCounterOperations(
     const id =
       readStringAttribute(attrs, "op") ??
       getCounterOperationId(slideNo, operations.length);
-    const counter = readStringAttribute(attrs, "counter") ?? "default";
+    const counter = readStringAttribute(attrs, "id") ?? "default";
     const level = readLevelAttribute(attrs);
     const action = getAction(component, readStringAttribute(attrs, "action"));
 

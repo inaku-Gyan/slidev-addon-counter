@@ -12,24 +12,24 @@ Development preview for `slidev-addon-counter`.
 ---
 
 ```vue
-<Counter counter="section" level="chapter" />
+<Counter id="section" level="chapter" />
 ```
 
-<Counter counter="section" level="chapter" />
+<Counter id="section" level="chapter" />
 
 ```vue
-<Counter counter="section" level="section" />
+<Counter id="section" level="section" />
 HAL_Delay
 ```
 
-<Counter counter="section" level="section" /> HAL_Delay
+<Counter id="section" level="section" /> HAL_Delay
 
 ---
 
-<Counter counter="theorem" level="theorem" /> Scheduler invariant
+<Counter id="theorem" level="theorem" /> Scheduler invariant
 
 ---
 
-<CounterIncrement counter="theorem" level="theorem" />
+<CounterIncrement id="theorem" level="theorem" />
 
-Latest theorem: <CounterDisplay counter="theorem" level="theorem" />
+Latest theorem: <CounterDisplay id="theorem" level="theorem" />
