@@ -39,9 +39,9 @@
     "test": "vitest run",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test && pnpm build"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
