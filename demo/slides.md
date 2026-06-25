@@ -117,13 +117,17 @@ Section again: <CounterStep id="section" level="section" />
 # Markdown heading composition
 
 ```vue
-# <CounterStep id="section" level="chapter" /> Timers
+#
+<CounterStep id="section" level="chapter" />
+Timers
 ```
 
 # <CounterStep id="section" level="chapter" /> Timers
 
 ```vue
-## <CounterStep id="section" level="section" /> SysTick
+##
+<CounterStep id="section" level="section" />
+SysTick
 ```
 
 ## <CounterStep id="section" level="section" /> SysTick
@@ -149,13 +153,13 @@ HAL_Delay
 # Code samples are just code
 
 ````vue
-Before: <CounterDisplay id="section" level="section" />
+Before:
+<CounterDisplay id="section" level="section" />
 
 ```vue
 <Counter id="section" level="section" />
-```
-
-After: <CounterDisplay id="section" level="section" />
+``` After:
+<CounterDisplay id="section" level="section" />
 ````
 
 Before: <CounterDisplay id="section" level="section" />
@@ -171,37 +175,29 @@ After: <CounterDisplay id="section" level="section" />
 # Config used by this demo
 
 ```ts
-export default defineCounterConfig({
-  counters: {
-    section: {
-      levels: [
-        {
-          level: 1,
-          alias: "chapter",
-          format: "第 %{:value} 章",
-        },
-        {
-          level: 2,
-          alias: "section",
-        },
-      ],
-    },
-    theorem: {
-      levels: [
-        {
-          level: 1,
-          alias: "theorem",
-          style: "upper-roman",
-          format: "Theorem %{:value}",
-        },
-      ],
-    },
-  },
-});
+section: {
+  levels: [
+    { level: 1, alias: "chapter", format: "第 %{:value} 章" },
+    { level: 2, alias: "section" },
+  ],
+}
 ```
 
 Chapter: <CounterStep id="section" level="chapter" />
 
 Section: <CounterStep id="section" level="section" />
+
+```ts
+theorem: {
+  levels: [
+    {
+      level: 1,
+      alias: "theorem",
+      style: "upper-roman",
+      format: "Theorem %{:value}",
+    },
+  ],
+}
+```
 
 Theorem: <CounterStep id="theorem" level="theorem" />
