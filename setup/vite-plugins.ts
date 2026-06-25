@@ -115,13 +115,9 @@ export default function counterVitePlugins(
         }
 
         await invalidateSnapshotModule(ctx.server);
-        ctx.server.ws.send({
-          type: "full-reload",
-          path: "*",
-          timestamp: Date.now(),
-        });
+        queueFullReload(ctx.server);
 
-        return [];
+        return undefined;
       },
     },
   ];
@@ -212,12 +208,34 @@ function isCounterDependency(
   options: CounterPluginOptions,
 ): boolean {
   const normalizedFile = normalize(file);
-  const configPath = getConfigPath(options.userRoot);
-  if (configPath && normalize(configPath) === normalizedFile) {
+  if (isCounterConfigFile(normalizedFile, options)) {
     return true;
   }
 
   return options.data.slides.some(
     (slide) => normalize(slide.source.filepath) === normalizedFile,
   );
+}
+
+function isCounterConfigFile(
+  file: string,
+  options: CounterPluginOptions,
+): boolean {
+  const normalizedFile = normalize(file);
+  const configPath = getConfigPath(options.userRoot);
+  if (configPath && normalize(configPath) === normalizedFile) {
+    return true;
+  }
+
+  return false;
+}
+
+function queueFullReload(server: ViteDevServerLike): void {
+  setTimeout(() => {
+    server.ws.send({
+      type: "full-reload",
+      path: "*",
+      timestamp: Date.now(),
+    });
+  }, 50);
 }
