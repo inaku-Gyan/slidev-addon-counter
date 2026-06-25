@@ -88,6 +88,16 @@ For the first public validation release, use `0.1.0-alpha.0`, which publishes
 to the `alpha` dist-tag and does not affect users installing the default
 `latest` tag.
 
+For a GitHub Actions release workflow test after a local first publish, bump to
+the next prerelease, for example `0.1.0-alpha.1`, tag it as
+`v0.1.0-alpha.1`, and let the workflow publish it to the `alpha` dist-tag.
+
+Check npm dist-tags after each release:
+
+```bash
+npm dist-tag ls slidev-addon-counter
+```
+
 ## GitHub Release
 
 After npm publish succeeds, the workflow creates a GitHub Release with generated
