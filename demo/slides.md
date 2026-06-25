@@ -11,6 +11,18 @@ Development preview for `slidev-addon-counter`.
 
 ---
 
-# Component Smoke Test
+<Counter counter="section" level="chapter" as="h1" /> HAL 时间基础
 
-<CounterDemo :counts="[1, 2, 3]" title="Multi-level counter" />
+---
+
+<Counter counter="section" level="section" /> HAL_Delay
+
+---
+
+<Counter counter="theorem" level="theorem" /> Scheduler invariant
+
+---
+
+<CounterIncrement counter="theorem" level="theorem" />
+
+Latest theorem: <CounterDisplay counter="theorem" level="theorem" />

@@ -1,7 +1,7 @@
 {
   "name": "slidev-addon-counter",
   "version": "0.0.0",
-  "description": "LaTeX-like multi-level counters and table-of-contents components for Slidev.",
+  "description": "LaTeX-like multi-level counters for Slidev.",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -26,12 +26,17 @@
   },
   "files": [
     "components",
+    "config.ts",
     "src/counter.ts",
     "styles",
     "setup",
     "README.md",
     "LICENSE"
   ],
+  "exports": {
+    "./config": "./config.ts",
+    "./src/counter": "./src/counter.ts"
+  },
   "scripts": {
     "dev": "slidev demo/slides.md --open",
     "build": "slidev build demo/slides.md",
@@ -47,11 +52,13 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@slidev/client": "^52.16.0"
+    "@slidev/client": "^52.16.0",
+    "jiti": "^2.7.0"
   },
   "devDependencies": {
     "@slidev/cli": "^52.16.0",
     "@slidev/theme-default": "^0.25.0",
+    "@types/node": "^26.0.0",
     "oxlint": "^1.71.0",
     "prettier": "^3.8.4",
     "prettier-plugin-slidev": "^1.0.5",

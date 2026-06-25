@@ -1,0 +1,358 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  buildCounterTimeline,
+  extractCounterOperations,
+  formatCounterValue,
+  getCounterDefinition,
+  injectCounterOperationIds,
+  normalizeCounterConfig,
+  renderCounterFormat,
+} from "./counter";
+
+describe("formatCounterValue", () => {
+  it("formats built-in styles", () => {
+    expect(formatCounterValue(3)).toBe("3");
+    expect(formatCounterValue(3, "zero")).toBe("03");
+    expect(formatCounterValue(27, "lower-alpha")).toBe("aa");
+    expect(formatCounterValue(27, "upper-alpha")).toBe("AA");
+    expect(formatCounterValue(14, "lower-roman")).toBe("xiv");
+    expect(formatCounterValue(14, "upper-roman")).toBe("XIV");
+    expect(formatCounterValue(12, "cjk")).toBe("十二");
+  });
+});
+
+describe("normalizeCounterConfig", () => {
+  it("creates a default infinite counter", () => {
+    const config = normalizeCounterConfig(undefined);
+    const counter = getCounterDefinition(config, "default");
+
+    expect(counter.id).toBe("default");
+    expect(counter.levels.size).toBe(0);
+  });
+
+  it("sorts references through explicit levels and aliases", () => {
+    const config = normalizeCounterConfig({
+      counters: {
+        section: {
+          levels: [
+            { level: 2, alias: "section" },
+            { level: 1, alias: "chapter" },
+          ],
+        },
+      },
+    });
+    const counter = getCounterDefinition(config, "section");
+
+    expect(counter.aliases.get("chapter")).toBe(1);
+    expect(counter.aliases.get("section")).toBe(2);
+  });
+
+  it("rejects duplicate aliases and levels", () => {
+    expect(() =>
+      normalizeCounterConfig({
+        counters: {
+          section: {
+            levels: [
+              { level: 1, alias: "chapter" },
+              { level: 1, alias: "section" },
+            ],
+          },
+        },
+      }),
+    ).toThrow("duplicates level 1");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: {
+          section: {
+            levels: [
+              { level: 1, alias: "chapter" },
+              { level: 2, alias: "chapter" },
+            ],
+          },
+        },
+      }),
+    ).toThrow('duplicates alias "chapter"');
+  });
+
+  it("rejects aliases that conflict with level refs", () => {
+    for (const alias of ["1", "@0", "chapter:one"]) {
+      expect(() =>
+        normalizeCounterConfig({
+          counters: {
+            section: {
+              levels: [{ level: 1, alias }],
+            },
+          },
+        }),
+      ).toThrow("alias");
+    }
+  });
+
+  it("rejects unsupported styles and reset rules", () => {
+    expect(() =>
+      normalizeCounterConfig({
+        counters: {
+          section: {
+            levels: [{ level: 1, style: "binary" as never }],
+          },
+        },
+      }),
+    ).toThrow("style");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: {
+          section: {
+            levels: [{ level: 1, reset: "parent" as never }],
+          },
+        },
+      }),
+    ).toThrow("reset");
+  });
+});
+
+describe("renderCounterFormat", () => {
+  it("renders value and full placeholders", () => {
+    const config = normalizeCounterConfig({
+      counters: {
+        section: {
+          levels: [
+            { level: 1, alias: "chapter", format: "第 %{:value} 章" },
+            { level: 2, alias: "section", format: "%{@-1:full}.%{:value}" },
+          ],
+        },
+      },
+    });
+    const counter = getCounterDefinition(config, "section");
+
+    expect(renderCounterFormat(counter, [2, 3], 2)).toBe("第 2 章.3");
+    expect(renderCounterFormat(counter, [2, 3], 1)).toBe("第 2 章");
+  });
+
+  it("renders value refs and raw refs", () => {
+    const config = normalizeCounterConfig({
+      counters: {
+        theorem: {
+          levels: [
+            {
+              level: 1,
+              alias: "theorem",
+              style: "upper-roman",
+              format: "T%{theorem:raw}=%{theorem:value}",
+            },
+          ],
+        },
+      },
+    });
+    const counter = getCounterDefinition(config, "theorem");
+
+    expect(renderCounterFormat(counter, [4], 1)).toBe("T4=IV");
+  });
+
+  it("rejects missing colon syntax, unknown placeholders, and recursive full refs", () => {
+    const unknown = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: {
+          c: { levels: [{ level: 1, format: "%{missing}" }] },
+        },
+      }),
+      "c",
+    );
+    expect(() => renderCounterFormat(unknown, [1], 1)).toThrow(
+      "without required ref:kind syntax",
+    );
+
+    const unknownKind = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: {
+          c: { levels: [{ level: 1, format: "%{:missing}" }] },
+        },
+      }),
+      "c",
+    );
+    expect(() => renderCounterFormat(unknownKind, [1], 1)).toThrow(
+      'Unknown counter format placeholder "%{:missing}"',
+    );
+
+    const recursive = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: {
+          c: { levels: [{ level: 1, format: "%{:full}" }] },
+        },
+      }),
+      "c",
+    );
+    expect(() => renderCounterFormat(recursive, [1], 1)).toThrow(
+      "recursively references itself",
+    );
+  });
+
+  it("rejects full refs to deeper levels", () => {
+    const byNumber = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: {
+          c: { levels: [{ level: 2, format: "%{3:full}" }] },
+        },
+      }),
+      "c",
+    );
+    expect(() => renderCounterFormat(byNumber, [1, 2, 3], 2)).toThrow(
+      "cannot use full reference to deeper level 3",
+    );
+
+    const byRelative = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: {
+          c: { levels: [{ level: 2, format: "%{@+1:full}" }] },
+        },
+      }),
+      "c",
+    );
+    expect(() => renderCounterFormat(byRelative, [1, 2, 3], 2)).toThrow(
+      "cannot use full reference to deeper level 3",
+    );
+  });
+
+  it("rejects invalid relative refs", () => {
+    const config = normalizeCounterConfig({
+      counters: {
+        c: {
+          levels: [
+            { level: 1, format: "%{@-1:value}" },
+            { level: 2, format: "%{@foo:value}" },
+          ],
+        },
+      },
+    });
+    const counter = getCounterDefinition(config, "c");
+
+    expect(() => renderCounterFormat(counter, [1], 1)).toThrow(
+      'relative level reference "@-1"',
+    );
+    expect(() => renderCounterFormat(counter, [1, 1], 2)).toThrow(
+      'Relative level reference "@foo" is not valid',
+    );
+  });
+});
+
+describe("buildCounterTimeline", () => {
+  it("keeps multiple counters independent", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "section",
+          level: 1,
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+        {
+          id: "b",
+          counter: "theorem",
+          level: 1,
+          action: "step",
+          slideNo: 1,
+          order: 1,
+        },
+        {
+          id: "c",
+          counter: "section",
+          level: 2,
+          action: "step",
+          slideNo: 2,
+          order: 0,
+        },
+        {
+          id: "d",
+          counter: "theorem",
+          level: 1,
+          action: "display",
+          slideNo: 2,
+          order: 1,
+        },
+      ],
+      {
+        counters: {
+          section: {},
+          theorem: {
+            levels: [
+              { level: 1, style: "upper-roman", format: "Theorem %{:value}" },
+            ],
+          },
+        },
+      },
+    );
+
+    expect(timeline.snapshots.a.display).toBe("1");
+    expect(timeline.snapshots.b.display).toBe("Theorem I");
+    expect(timeline.snapshots.c.display).toBe("1.1");
+    expect(timeline.snapshots.d.display).toBe("Theorem I");
+  });
+
+  it("supports increment without display and display without increment", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "default",
+          level: 1,
+          action: "increment",
+          slideNo: 1,
+          order: 0,
+        },
+        {
+          id: "b",
+          counter: "default",
+          level: 1,
+          action: "display",
+          slideNo: 1,
+          order: 1,
+        },
+      ],
+      undefined,
+    );
+
+    expect(timeline.snapshots.a.display).toBe("1");
+    expect(timeline.snapshots.b.display).toBe("1");
+  });
+});
+
+describe("counter component scanner", () => {
+  it("extracts operations and injects deterministic ids", () => {
+    const content = [
+      '<Counter counter="section" level="chapter" />',
+      '<CounterIncrement counter="theorem" :level="1" />',
+      '<CounterDisplay counter="theorem" level="theorem" />',
+    ].join("\n");
+
+    expect(extractCounterOperations(content, 3, "Title")).toMatchObject([
+      {
+        id: "counter-s3-o0",
+        counter: "section",
+        level: "chapter",
+        action: "step",
+      },
+      {
+        id: "counter-s3-o1",
+        counter: "theorem",
+        level: 1,
+        action: "increment",
+      },
+      {
+        id: "counter-s3-o2",
+        counter: "theorem",
+        level: "theorem",
+        action: "display",
+      },
+    ]);
+
+    expect(injectCounterOperationIds(content, 3)).toEqual([
+      { index: 8, value: ' op="counter-s3-o0"' },
+      { index: 63, value: ' op="counter-s3-o1"' },
+      { index: 111, value: ' op="counter-s3-o2"' },
+    ]);
+  });
+});

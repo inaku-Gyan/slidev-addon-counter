@@ -8,10 +8,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "types": ["vitest/globals"]
+    "types": ["node", "vitest/globals"]
   },
   "include": [
     "components/**/*.vue",
+    "config.ts",
+    "demo/slidev-addon-counter.config.ts",
     "src/**/*.ts",
     "setup/**/*.ts",
     "env.d.ts",
