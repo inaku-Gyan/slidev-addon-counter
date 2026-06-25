@@ -14,6 +14,10 @@ import {
 const CONFIG_FILE = "slidev-addon-counter.config.ts";
 const VIRTUAL_ID = "virtual:slidev-addon-counter/snapshots";
 const RESOLVED_VIRTUAL_ID = "\0virtual:slidev-addon-counter/snapshots";
+const DIRECT_VIRTUAL_PATHS = [
+  "/virtual:slidev-addon-counter/snapshots",
+  "/@slidev-addon-counter/snapshots",
+];
 
 export default function counterVitePlugins(options: {
   userRoot: string;
@@ -43,29 +47,74 @@ export default function counterVitePlugins(options: {
       resolveId(id: string) {
         return id === VIRTUAL_ID ? RESOLVED_VIRTUAL_ID : undefined;
       },
+      configureServer(server: {
+        middlewares: {
+          use: (
+            handler: (
+              req: { url?: string },
+              res: {
+                end: (chunk?: string) => void;
+                setHeader: (name: string, value: string) => void;
+                statusCode: number;
+              },
+              next: (error?: unknown) => void,
+            ) => void,
+          ) => void;
+        };
+      }) {
+        server.middlewares.use((req, res, next) => {
+          if (!isDirectVirtualRequest(req.url)) {
+            next();
+            return;
+          }
+
+          createSnapshotModule(options)
+            .then((code) => {
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "text/javascript");
+              res.end(code);
+            })
+            .catch(next);
+        });
+      },
       async load(id: string) {
         if (id !== RESOLVED_VIRTUAL_ID) {
           return undefined;
         }
 
-        const rawConfig = await loadUserConfig(options.userRoot);
-        const config = normalizeCounterConfig(rawConfig);
-        const operations = options.data.slides.flatMap((slide) =>
-          extractCounterOperations(
-            slide.source.content,
-            slide.index + 1,
-            slide.title,
-          ),
-        );
-        const timeline = buildCounterTimeline(operations, config);
-
-        return [
-          `export const snapshots = ${JSON.stringify(timeline.snapshots, null, 2)}`,
-          `export const operations = ${JSON.stringify(timeline.operations, null, 2)}`,
-        ].join("\n");
+        return createSnapshotModule(options);
       },
     },
   ];
+}
+
+async function createSnapshotModule(options: {
+  userRoot: string;
+  data: {
+    slides: Array<{
+      index: number;
+      title?: string;
+      source: {
+        content: string;
+      };
+    }>;
+  };
+}): Promise<string> {
+  const rawConfig = await loadUserConfig(options.userRoot);
+  const config = normalizeCounterConfig(rawConfig);
+  const operations = options.data.slides.flatMap((slide) =>
+    extractCounterOperations(
+      slide.source.content,
+      slide.index + 1,
+      slide.title,
+    ),
+  );
+  const timeline = buildCounterTimeline(operations, config);
+
+  return [
+    `export const snapshots = ${JSON.stringify(timeline.snapshots, null, 2)}`,
+    `export const operations = ${JSON.stringify(timeline.operations, null, 2)}`,
+  ].join("\n");
 }
 
 async function loadUserConfig(
@@ -86,4 +135,13 @@ async function loadUserConfig(
 function getConfigPath(userRoot: string): string | undefined {
   const configPath = join(userRoot, CONFIG_FILE);
   return existsSync(configPath) ? configPath : undefined;
+}
+
+function isDirectVirtualRequest(url: string | undefined): boolean {
+  if (!url) {
+    return false;
+  }
+
+  const pathname = url.split("?", 1)[0];
+  return DIRECT_VIRTUAL_PATHS.includes(pathname);
 }
