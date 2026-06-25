@@ -13,12 +13,8 @@ Counters render as plain text and can be composed inside normal Markdown, Vue
 components, and Slidev layouts.
 
 ---
-layout: two-cols-header
----
 
 # Basic section counter
-
-::left::
 
 Source
 
@@ -34,27 +30,23 @@ Chapter <Counter id="section" level="chapter" />
 Section <Counter id="section" level="section" />
 ```
 
-::right::
-
 Rendered
 
-Chapter <Counter id="section" level="chapter" />
-<br>
-Section <Counter id="section" level="section" />
-<br>
-Section <Counter id="section" level="section" />
-<br>
-Chapter <Counter id="section" level="chapter" />
-<br>
-Section <Counter id="section" level="section" />
+<div class="text-xl leading-10">
+  Chapter <Counter id="section" level="chapter" />
+  <br />
+  Section <Counter id="section" level="section" />
+  <br />
+  Section <Counter id="section" level="section" />
+  <br />
+  Chapter <Counter id="section" level="chapter" />
+  <br />
+  Section <Counter id="section" level="section" />
+</div>
 
----
-layout: two-cols-header
 ---
 
 # Alias and numeric levels
-
-::left::
 
 Source
 
@@ -66,23 +58,17 @@ Source
 <CounterStep id="section" :level="2" />
 ```
 
-::right::
-
 Rendered
 
-<div class="space-y-4 text-2xl">
+<div class="space-y-3 text-2xl">
   <div><CounterStep id="section" level="chapter" /></div>
   <div><CounterStep id="section" level="section" /></div>
   <div><CounterStep id="section" :level="2" /></div>
 </div>
 
 ---
-layout: two-cols-header
----
 
 # Step, increment, display
-
-::left::
 
 Source
 
@@ -97,11 +83,9 @@ Latest theorem:
 <CounterDisplay id="theorem" level="theorem" />
 ```
 
-::right::
-
 Rendered
 
-<div class="space-y-6 text-xl">
+<div class="space-y-4 text-xl">
   <p>
     Visible theorem:
     <strong><CounterStep id="theorem" level="theorem" /></strong>
@@ -120,12 +104,8 @@ Rendered
 </div>
 
 ---
-layout: two-cols-header
----
 
 # Independent counters
-
-::left::
 
 Source
 
@@ -140,11 +120,9 @@ Section again:
 <CounterStep id="section" level="section" />
 ```
 
-::right::
-
 Rendered
 
-<div class="space-y-5 text-xl">
+<div class="space-y-4 text-xl">
   <p>
     Section:
     <strong><CounterStep id="section" level="section" /></strong>
@@ -162,46 +140,48 @@ Rendered
 </div>
 
 ---
-layout: two-cols-header
----
 
-# Plain text composition
-
-::left::
+# Markdown heading composition
 
 Source
 
 ```md
-## <CounterStep id="section" level="chapter" /> Timers
+# <CounterStep id="section" level="chapter" /> Timers
 
-<span class="text-sky-600 font-bold">
-  <CounterStep id="section" level="section" />
-</span>
- SysTick
+## <CounterStep id="section" level="section" /> SysTick
 ```
-
-::right::
 
 Rendered
 
-<h2 class="text-3xl font-bold mb-8">
-  <CounterStep id="section" level="chapter" /> Timers
-</h2>
+# <CounterStep id="section" level="chapter" /> Timers
+
+## <CounterStep id="section" level="section" /> SysTick
+
+---
+
+# Styled plain text
+
+Source
+
+```md
+<span class="text-sky-600 font-bold">
+  <CounterStep id="section" level="section" />
+</span>
+HAL_Delay
+```
+
+Rendered
 
 <p class="text-2xl">
   <span class="text-sky-600 font-bold">
     <CounterStep id="section" level="section" />
   </span>
-  SysTick
+  HAL_Delay
 </p>
 
 ---
-layout: two-cols-header
----
 
 # Code samples are just code
-
-::left::
 
 Source
 
@@ -216,8 +196,6 @@ Before:
 After:
 <CounterDisplay id="section" level="section" />
 ````
-
-::right::
 
 Rendered
 
@@ -238,12 +216,8 @@ Rendered
 </div>
 
 ---
-layout: two-cols-header
----
 
 # Config used by this demo
-
-::left::
 
 Source
 
@@ -277,11 +251,9 @@ export default defineCounterConfig({
 });
 ```
 
-::right::
-
 Rendered formats
 
-<div class="space-y-6 text-xl">
+<div class="grid grid-cols-3 gap-6 text-xl">
   <div>
     <div class="text-sm uppercase tracking-wide opacity-60">chapter</div>
     <div class="text-3xl font-bold"><CounterStep id="section" level="chapter" /></div>
