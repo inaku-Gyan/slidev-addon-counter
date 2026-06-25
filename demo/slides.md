@@ -190,12 +190,7 @@ Section: <CounterStep id="section" level="section" />
 ```ts
 theorem: {
   levels: [
-    {
-      level: 1,
-      alias: "theorem",
-      style: "upper-roman",
-      format: "Theorem %{:value}",
-    },
+    { level: 1, alias: "theorem", style: "upper-roman", format: "Theorem %{:value}" },
   ],
 }
 ```
