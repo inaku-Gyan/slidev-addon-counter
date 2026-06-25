@@ -54,6 +54,15 @@ Use counters in slides:
 `action="step"` increments and displays, `action="increment"` only increments,
 and `action="display"` only displays the current value.
 
+`<Counter>` renders plain text, not an HTML wrapper element. To style a counter,
+wrap it yourself:
+
+```md
+<span class="text-red-500">
+  <Counter counter="section" level="section" />
+</span>
+```
+
 Formats use `%{ref:kind}` placeholders. The `ref` may be empty for the
 current level, so `%{:value}` is equivalent to `%{@0:value}`. Use relative
 refs such as `%{@-1:full}` for parent levels, numeric refs such as

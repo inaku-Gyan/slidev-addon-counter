@@ -11,9 +11,16 @@ Development preview for `slidev-addon-counter`.
 
 ---
 
-<Counter counter="section" level="chapter" as="h1" /> HAL 时间基础
+```vue
+<Counter counter="section" level="chapter" />
+```
 
----
+<Counter counter="section" level="chapter" />
+
+```vue
+<Counter counter="section" level="section" />
+HAL_Delay
+```
 
 <Counter counter="section" level="section" /> HAL_Delay
 

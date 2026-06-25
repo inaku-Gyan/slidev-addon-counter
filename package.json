@@ -28,7 +28,6 @@
     "components",
     "config.ts",
     "src/counter.ts",
-    "styles",
     "setup",
     "README.md",
     "LICENSE"

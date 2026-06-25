@@ -14,7 +14,6 @@ export default defineCounterConfig({
           level: 2,
           alias: "section",
           style: "decimal",
-          format: "%{@-1:full}.%{:value}",
         },
       ],
     },
