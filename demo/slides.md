@@ -116,13 +116,13 @@ Section again: <CounterStep id="section" level="section" />
 
 # Markdown heading composition
 
-```md
+```vue
 # <CounterStep id="section" level="chapter" /> Timers
 ```
 
 # <CounterStep id="section" level="chapter" /> Timers
 
-```md
+```vue
 ## <CounterStep id="section" level="section" /> SysTick
 ```
 
@@ -132,7 +132,7 @@ Section again: <CounterStep id="section" level="section" />
 
 # Styled plain text
 
-```md
+```vue
 <span class="text-sky-600 font-bold">
   <CounterStep id="section" level="section" />
 </span>
@@ -148,7 +148,7 @@ HAL_Delay
 
 # Code samples are just code
 
-````md
+````vue
 Before: <CounterDisplay id="section" level="section" />
 
 ```vue
