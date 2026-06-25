@@ -14,6 +14,7 @@ components, and Slidev layouts.
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Basic section counter
@@ -27,7 +28,7 @@ Source
 
 <Counter id="section" level="section" /> RTOS basics
 
-<Counter id="section" level="section" /> Task scheduling
+# <Counter id="section" level="section" /> Task scheduling
 ```
 
 ::right::
@@ -42,12 +43,11 @@ Rendered
   <Counter id="section" level="section" /> RTOS basics
 </div>
 
-<div class="text-xl">
-  <Counter id="section" level="section" /> Task scheduling
-</div>
+# <Counter id="section" level="section" /> Task scheduling
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Alias and numeric levels
@@ -76,6 +76,7 @@ Rendered
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Step, increment, display
@@ -119,6 +120,7 @@ Rendered
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Independent counters
@@ -161,6 +163,7 @@ Rendered
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Plain text composition
@@ -170,31 +173,34 @@ layout: two-cols-header
 Source
 
 ```md
-## <CounterStep id="section" level="chapter" /> Timers
+# <CounterStep id="section" level="chapter" /> Timers
+
+## <CounterStep id="section" level="section" /> SysTick
 
 <span class="text-sky-600 font-bold">
   <CounterStep id="section" level="section" />
 </span>
- SysTick
+ HAL_Delay
 ```
 
 ::right::
 
 Rendered
 
-<h2 class="text-3xl font-bold mb-8">
-  <CounterStep id="section" level="chapter" /> Timers
-</h2>
+# <CounterStep id="section" level="chapter" /> Timers
+
+## <CounterStep id="section" level="section" /> SysTick
 
 <p class="text-2xl">
   <span class="text-sky-600 font-bold">
     <CounterStep id="section" level="section" />
   </span>
-  SysTick
+  HAL_Delay
 </p>
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Code samples are just code
@@ -237,6 +243,7 @@ Rendered
 
 ---
 layout: two-cols-header
+layoutClass: counter-demo-two-cols
 ---
 
 # Config used by this demo
@@ -295,3 +302,34 @@ Rendered formats
     <div class="text-3xl font-bold"><CounterStep id="theorem" level="theorem" /></div>
   </div>
 </div>
+
+<style>
+.counter-demo-two-cols {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 3rem;
+}
+
+.counter-demo-two-cols .col-left,
+.counter-demo-two-cols .col-right {
+  min-width: 0;
+}
+
+.counter-demo-two-cols .col-left {
+  padding-right: 0.5rem;
+}
+
+.counter-demo-two-cols .col-right {
+  padding-left: 1rem;
+  border-left: 1px solid rgb(148 163 184 / 0.28);
+}
+
+.counter-demo-two-cols .slidev-code-wrapper,
+.counter-demo-two-cols pre {
+  max-width: 100%;
+}
+
+.counter-demo-two-cols pre code {
+  font-size: 0.72rem;
+  line-height: 1.38;
+}
+</style>
