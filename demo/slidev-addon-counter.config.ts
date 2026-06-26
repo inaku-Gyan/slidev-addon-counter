@@ -15,8 +15,12 @@ export default defineCounterConfig({
           level: 2,
           alias: "section",
           style: "decimal",
+          format: "%{@-1:full}第 %{:value} 节",
         },
       ],
+    },
+    {
+      id: "demo",
     },
     {
       id: "theorem",
