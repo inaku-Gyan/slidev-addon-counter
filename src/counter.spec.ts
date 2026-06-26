@@ -33,14 +33,15 @@ describe("normalizeCounterConfig", () => {
 
   it("sorts references through explicit levels and aliases", () => {
     const config = normalizeCounterConfig({
-      counters: {
-        section: {
+      counters: [
+        {
+          id: "section",
           levels: [
             { level: 2, alias: "section" },
             { level: 1, alias: "chapter" },
           ],
         },
-      },
+      ],
     });
     const counter = getCounterDefinition(config, "section");
 
@@ -51,40 +52,57 @@ describe("normalizeCounterConfig", () => {
   it("rejects duplicate aliases and levels", () => {
     expect(() =>
       normalizeCounterConfig({
-        counters: {
-          section: {
+        counters: [
+          {
+            id: "section",
             levels: [
               { level: 1, alias: "chapter" },
               { level: 1, alias: "section" },
             ],
           },
-        },
+        ],
       }),
     ).toThrow("duplicates level 1");
 
     expect(() =>
       normalizeCounterConfig({
-        counters: {
-          section: {
+        counters: [
+          {
+            id: "section",
             levels: [
               { level: 1, alias: "chapter" },
               { level: 2, alias: "chapter" },
             ],
           },
-        },
+        ],
       }),
     ).toThrow('duplicates alias "chapter"');
+  });
+
+  it("rejects missing and duplicate counter ids", () => {
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [{ id: "" }],
+      }),
+    ).toThrow("non-empty string");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [{ id: "section" }, { id: "section" }],
+      }),
+    ).toThrow('duplicates counter id "section"');
   });
 
   it("rejects aliases that conflict with level refs", () => {
     for (const alias of ["1", "@0", "chapter:one"]) {
       expect(() =>
         normalizeCounterConfig({
-          counters: {
-            section: {
+          counters: [
+            {
+              id: "section",
               levels: [{ level: 1, alias }],
             },
-          },
+          ],
         }),
       ).toThrow("alias");
     }
@@ -93,21 +111,23 @@ describe("normalizeCounterConfig", () => {
   it("rejects unsupported styles and reset rules", () => {
     expect(() =>
       normalizeCounterConfig({
-        counters: {
-          section: {
+        counters: [
+          {
+            id: "section",
             levels: [{ level: 1, style: "binary" as never }],
           },
-        },
+        ],
       }),
     ).toThrow("style");
 
     expect(() =>
       normalizeCounterConfig({
-        counters: {
-          section: {
+        counters: [
+          {
+            id: "section",
             levels: [{ level: 1, reset: "parent" as never }],
           },
-        },
+        ],
       }),
     ).toThrow("reset");
   });
@@ -116,14 +136,15 @@ describe("normalizeCounterConfig", () => {
 describe("renderCounterFormat", () => {
   it("renders value and full placeholders", () => {
     const config = normalizeCounterConfig({
-      counters: {
-        section: {
+      counters: [
+        {
+          id: "section",
           levels: [
             { level: 1, alias: "chapter", format: "第 %{:value} 章" },
             { level: 2, alias: "section", format: "%{@-1:full}.%{:value}" },
           ],
         },
-      },
+      ],
     });
     const counter = getCounterDefinition(config, "section");
 
@@ -133,8 +154,9 @@ describe("renderCounterFormat", () => {
 
   it("renders value refs and raw refs", () => {
     const config = normalizeCounterConfig({
-      counters: {
-        theorem: {
+      counters: [
+        {
+          id: "theorem",
           levels: [
             {
               level: 1,
@@ -144,7 +166,7 @@ describe("renderCounterFormat", () => {
             },
           ],
         },
-      },
+      ],
     });
     const counter = getCounterDefinition(config, "theorem");
 
@@ -154,9 +176,7 @@ describe("renderCounterFormat", () => {
   it("rejects missing colon syntax, unknown placeholders, and recursive full refs", () => {
     const unknown = getCounterDefinition(
       normalizeCounterConfig({
-        counters: {
-          c: { levels: [{ level: 1, format: "%{missing}" }] },
-        },
+        counters: [{ id: "c", levels: [{ level: 1, format: "%{missing}" }] }],
       }),
       "c",
     );
@@ -166,9 +186,7 @@ describe("renderCounterFormat", () => {
 
     const unknownKind = getCounterDefinition(
       normalizeCounterConfig({
-        counters: {
-          c: { levels: [{ level: 1, format: "%{:missing}" }] },
-        },
+        counters: [{ id: "c", levels: [{ level: 1, format: "%{:missing}" }] }],
       }),
       "c",
     );
@@ -178,9 +196,7 @@ describe("renderCounterFormat", () => {
 
     const recursive = getCounterDefinition(
       normalizeCounterConfig({
-        counters: {
-          c: { levels: [{ level: 1, format: "%{:full}" }] },
-        },
+        counters: [{ id: "c", levels: [{ level: 1, format: "%{:full}" }] }],
       }),
       "c",
     );
@@ -192,9 +208,7 @@ describe("renderCounterFormat", () => {
   it("rejects full refs to deeper levels", () => {
     const byNumber = getCounterDefinition(
       normalizeCounterConfig({
-        counters: {
-          c: { levels: [{ level: 2, format: "%{3:full}" }] },
-        },
+        counters: [{ id: "c", levels: [{ level: 2, format: "%{3:full}" }] }],
       }),
       "c",
     );
@@ -204,9 +218,7 @@ describe("renderCounterFormat", () => {
 
     const byRelative = getCounterDefinition(
       normalizeCounterConfig({
-        counters: {
-          c: { levels: [{ level: 2, format: "%{@+1:full}" }] },
-        },
+        counters: [{ id: "c", levels: [{ level: 2, format: "%{@+1:full}" }] }],
       }),
       "c",
     );
@@ -217,14 +229,15 @@ describe("renderCounterFormat", () => {
 
   it("rejects invalid relative refs", () => {
     const config = normalizeCounterConfig({
-      counters: {
-        c: {
+      counters: [
+        {
+          id: "c",
           levels: [
             { level: 1, format: "%{@-1:value}" },
             { level: 2, format: "%{@foo:value}" },
           ],
         },
-      },
+      ],
     });
     const counter = getCounterDefinition(config, "c");
 
@@ -275,14 +288,15 @@ describe("buildCounterTimeline", () => {
         },
       ],
       {
-        counters: {
-          section: {},
-          theorem: {
+        counters: [
+          { id: "section" },
+          {
+            id: "theorem",
             levels: [
               { level: 1, style: "upper-roman", format: "Theorem %{:value}" },
             ],
           },
-        },
+        ],
       },
     );
 

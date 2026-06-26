@@ -25,8 +25,9 @@ Define counters in `slidev-addon-counter.config.ts` next to your deck entry:
 import { defineCounterConfig } from "slidev-addon-counter/config";
 
 export default defineCounterConfig({
-  counters: {
-    section: {
+  counters: [
+    {
+      id: "section",
       levels: [
         {
           level: 1,
@@ -42,7 +43,7 @@ export default defineCounterConfig({
         },
       ],
     },
-  },
+  ],
 });
 ```
 

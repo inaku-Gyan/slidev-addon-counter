@@ -176,25 +176,27 @@ After: <CounterDisplay id="section" level="section" />
 
 # Config used by this demo
 
-```ts
-section: {
-  levels: [
-    { level: 1, alias: "chapter", format: "第 %{:value} 章" },
-    { level: 2, alias: "section" },
-  ],
+```json
+{
+  "counters": [
+    {
+      "id": "section",
+      "levels": [
+        { "level": 1, "alias": "chapter", "format": "第 %{:value} 章" },
+        { "level": 2, "alias": "section" }
+      ]
+    },
+    {
+      "id": "theorem",
+      "levels": [
+        {
+          "level": 1,
+          "alias": "theorem",
+          "style": "upper-roman",
+          "format": "Theorem %{:value}"
+        }
+      ]
+    }
+  ]
 }
 ```
-
-Chapter: <Counter id="section" level="chapter" />
-
-Section: <Counter id="section" level="section" />
-
-```ts
-theorem: {
-  levels: [
-    { level: 1, alias: "theorem", style: "upper-roman", format: "Theorem %{:value}" },
-  ],
-}
-```
-
-Theorem: <Counter id="theorem" level="theorem" />

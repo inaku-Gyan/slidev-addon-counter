@@ -23,11 +23,12 @@ export interface CounterLevelConfig {
 }
 
 export interface CounterDefinition {
+  id: string;
   levels?: CounterLevelConfig[];
 }
 
 export interface CounterConfig {
-  counters?: Record<string, CounterDefinition>;
+  counters?: CounterDefinition[];
 }
 
 export interface NormalizedCounterLevel {
@@ -116,33 +117,42 @@ export function defineCounterConfig<T extends CounterConfig>(config: T): T {
 export function normalizeCounterConfig(
   config: CounterConfig | undefined,
 ): NormalizedCounterConfig {
-  const inputCounters = config?.counters ?? { default: {} };
+  const inputCounters = config?.counters ?? [{ id: "default" }];
   const counters = new Map<string, NormalizedCounterDefinition>();
 
-  for (const [id, definition] of Object.entries(inputCounters)) {
+  for (const [counterIndex, definition] of inputCounters.entries()) {
+    const counterPath = `counters[${counterIndex}]`;
+    const id = definition.id;
+
     if (!id) {
-      throw new Error("counters contains an empty counter id.");
+      throw new Error(`${counterPath}.id must be a non-empty string.`);
+    }
+
+    if (counters.has(id)) {
+      throw new Error(`${counterPath}.id duplicates counter id "${id}".`);
     }
 
     const levels = new Map<number, NormalizedCounterLevel>();
     const aliases = new Map<string, number>();
 
     for (const [index, levelConfig] of (definition.levels ?? []).entries()) {
-      const path = `counters.${id}.levels[${index}]`;
+      const levelPath = `counters[${counterIndex}].levels[${index}]`;
 
       if (!Number.isInteger(levelConfig.level) || levelConfig.level < 1) {
-        throw new Error(`${path}.level must be a positive integer.`);
+        throw new Error(`${levelPath}.level must be a positive integer.`);
       }
 
       if (levels.has(levelConfig.level)) {
-        throw new Error(`${path}.level duplicates level ${levelConfig.level}.`);
+        throw new Error(
+          `${levelPath}.level duplicates level ${levelConfig.level}.`,
+        );
       }
 
       if (levelConfig.alias != null) {
-        validateAlias(levelConfig.alias, `${path}.alias`);
+        validateAlias(levelConfig.alias, `${levelPath}.alias`);
         if (aliases.has(levelConfig.alias)) {
           throw new Error(
-            `${path}.alias duplicates alias "${levelConfig.alias}".`,
+            `${levelPath}.alias duplicates alias "${levelConfig.alias}".`,
           );
         }
         aliases.set(levelConfig.alias, levelConfig.level);
@@ -150,12 +160,12 @@ export function normalizeCounterConfig(
 
       const style = levelConfig.style ?? "decimal";
       if (!BUILTIN_STYLES.has(style)) {
-        throw new Error(`${path}.style "${style}" is not supported.`);
+        throw new Error(`${levelPath}.style "${style}" is not supported.`);
       }
 
       const reset = levelConfig.reset ?? "lower";
       if (!BUILTIN_RESETS.has(reset)) {
-        throw new Error(`${path}.reset "${reset}" is not supported.`);
+        throw new Error(`${levelPath}.reset "${reset}" is not supported.`);
       }
 
       levels.set(levelConfig.level, {

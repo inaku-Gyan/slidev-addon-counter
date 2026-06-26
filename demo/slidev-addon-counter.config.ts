@@ -1,8 +1,9 @@
 import { defineCounterConfig } from "../config";
 
 export default defineCounterConfig({
-  counters: {
-    section: {
+  counters: [
+    {
+      id: "section",
       levels: [
         {
           level: 1,
@@ -17,7 +18,8 @@ export default defineCounterConfig({
         },
       ],
     },
-    theorem: {
+    {
+      id: "theorem",
       levels: [
         {
           level: 1,
@@ -27,5 +29,5 @@ export default defineCounterConfig({
         },
       ],
     },
-  },
+  ],
 });
