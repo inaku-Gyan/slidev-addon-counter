@@ -59,7 +59,7 @@ Use counters in slides:
 
 <Counter id="section" level="section" />
 
-<CounterIncrement id="theorem" level="theorem" />
+<CounterInc id="theorem" level="theorem" />
 <CounterDisplay id="theorem" level="theorem" />
 ```
 

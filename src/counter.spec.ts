@@ -329,7 +329,7 @@ describe("counter component scanner", () => {
       '`<Counter id="ignored" level="chapter" />`',
       '<Counter id="section" level="chapter" />',
       'Text <Counter id="section" level="section" />',
-      '<CounterIncrement id="theorem" :level="1" />',
+      '<CounterInc id="theorem" :level="1" />',
       '<CounterDisplay id="theorem" level="theorem" />',
     ].join("\n");
 
@@ -363,8 +363,8 @@ describe("counter component scanner", () => {
     expect(injectCounterOperationIds(content, 3)).toEqual([
       { index: 103, value: ' op="counter-s3-o0"' },
       { index: 149, value: ' op="counter-s3-o1"' },
-      { index: 199, value: ' op="counter-s3-o2"' },
-      { index: 242, value: ' op="counter-s3-o3"' },
+      { index: 193, value: ' op="counter-s3-o2"' },
+      { index: 236, value: ' op="counter-s3-o3"' },
     ]);
   });
 });

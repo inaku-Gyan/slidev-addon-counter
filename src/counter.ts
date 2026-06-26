@@ -106,12 +106,7 @@ const BUILTIN_STYLES = new Set<CounterStyle>([
 const BUILTIN_RESETS = new Set<CounterReset>(["lower", "none"]);
 const BUILTIN_PLACEHOLDER_KINDS = new Set(["value", "raw", "full"]);
 const PLACEHOLDER_RE = /%\{([^}]*)\}/g;
-const COUNTER_COMPONENTS = new Set([
-  "Counter",
-  "CounterStep",
-  "CounterIncrement",
-  "CounterDisplay",
-]);
+const COUNTER_COMPONENTS = new Set(["Counter", "CounterInc", "CounterDisplay"]);
 const markdownIt = new MarkdownIt({ html: true });
 
 export function defineCounterConfig<T extends CounterConfig>(config: T): T {
@@ -751,7 +746,7 @@ function getAction(
     throw new Error(`Counter action "${actionAttribute}" is not supported.`);
   }
 
-  if (component === "CounterIncrement") {
+  if (component === "CounterInc") {
     return "increment";
   }
 

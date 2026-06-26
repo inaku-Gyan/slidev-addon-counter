@@ -51,38 +51,38 @@ components, and Slidev layouts.
 # Alias and numeric levels
 
 ```vue
-<CounterStep id="section" level="chapter" />
+<Counter id="section" level="chapter" />
 ```
 
-<CounterStep id="section" level="chapter" />
+<Counter id="section" level="chapter" />
 
 ```vue
-<CounterStep id="section" level="section" />
+<Counter id="section" level="section" />
 ```
 
-<CounterStep id="section" level="section" />
+<Counter id="section" level="section" />
 
 ```vue
-<CounterStep id="section" :level="2" />
+<Counter id="section" :level="2" />
 ```
 
-<CounterStep id="section" :level="2" />
+<Counter id="section" :level="2" />
 
 ---
 
 # Step, increment, display
 
 ```vue
-<CounterStep id="theorem" level="theorem" />
+<Counter id="theorem" level="theorem" />
 ```
 
-<CounterStep id="theorem" level="theorem" />
+<Counter id="theorem" level="theorem" />
 
 ```vue
-<CounterIncrement id="theorem" level="theorem" />
+<CounterInc id="theorem" level="theorem" />
 ```
 
-<CounterIncrement id="theorem" level="theorem" /> No text is rendered here.
+<CounterInc id="theorem" level="theorem" /> No text is rendered here.
 
 ```vue
 <CounterDisplay id="theorem" level="theorem" />
@@ -95,38 +95,38 @@ components, and Slidev layouts.
 # Independent counters
 
 ```vue
-<CounterStep id="section" level="section" />
+<Counter id="section" level="section" />
 ```
 
-Section: <CounterStep id="section" level="section" />
+Section: <Counter id="section" level="section" />
 
 ```vue
-<CounterStep id="theorem" level="theorem" />
+<Counter id="theorem" level="theorem" />
 ```
 
-Theorem: <CounterStep id="theorem" level="theorem" />
+Theorem: <Counter id="theorem" level="theorem" />
 
 ```vue
-<CounterStep id="section" level="section" />
+<Counter id="section" level="section" />
 ```
 
-Section again: <CounterStep id="section" level="section" />
+Section again: <Counter id="section" level="section" />
 
 ---
 
 # Markdown heading composition
 
 ```md
-# <CounterStep id="section" level="chapter" /> Timers
+# <Counter id="section" level="chapter" /> Timers
 ```
 
-# <CounterStep id="section" level="chapter" /> Timers
+# <Counter id="section" level="chapter" /> Timers
 
 ```md
-## <CounterStep id="section" level="section" /> SysTick
+## <Counter id="section" level="section" /> SysTick
 ```
 
-## <CounterStep id="section" level="section" /> SysTick
+## <Counter id="section" level="section" /> SysTick
 
 ---
 
@@ -134,7 +134,7 @@ Section again: <CounterStep id="section" level="section" />
 
 ```vue
 <span class="text-sky-600 font-bold">
-  <CounterStep id="section" level="section" />
+  <Counter id="section" level="section" />
 </span>
 How does
 <code>HAL_Delay</code>
@@ -142,7 +142,7 @@ work?
 ```
 
 <span class="text-sky-600 font-bold">
-  <CounterStep id="section" level="section" />
+  <Counter id="section" level="section" />
 </span>
 How does
 <code>HAL_Delay</code>
@@ -185,9 +185,9 @@ section: {
 }
 ```
 
-Chapter: <CounterStep id="section" level="chapter" />
+Chapter: <Counter id="section" level="chapter" />
 
-Section: <CounterStep id="section" level="section" />
+Section: <Counter id="section" level="section" />
 
 ```ts
 theorem: {
@@ -197,4 +197,4 @@ theorem: {
 }
 ```
 
-Theorem: <CounterStep id="theorem" level="theorem" />
+Theorem: <Counter id="theorem" level="theorem" />
