@@ -31,7 +31,9 @@
   "files": [
     "components",
     "config.ts",
+    "docs/README.zh-CN.md",
     "docs/manual.md",
+    "docs/manual.zh-CN.md",
     "src/counter.ts",
     "setup",
     "README.md",

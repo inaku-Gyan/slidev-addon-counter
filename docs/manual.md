@@ -1,16 +1,18 @@
-# slidev-addon-counter 用户手册
+# slidev-addon-counter User Manual
 
-`slidev-addon-counter` 为 Slidev 提供类似 LaTeX 的多级计数器。它可以在 Markdown、Vue 组件和 Slidev 布局中生成稳定的章节、小节、定理、例题等编号。
+English | [中文](./manual.zh-CN.md)
 
-## 安装和启用
+`slidev-addon-counter` provides LaTeX-like multi-level counters for Slidev. Use it to generate stable chapter, section, theorem, example, or other reusable numbers in Markdown, Vue components, and Slidev layouts.
 
-安装插件：
+## Install and Enable
+
+Install the addon:
 
 ```bash
 pnpm add -D slidev-addon-counter
 ```
 
-在 Slidev deck 的 frontmatter 中启用：
+Enable it in your Slidev deck frontmatter:
 
 ```md
 ---
@@ -19,32 +21,23 @@ addons:
 ---
 ```
 
-本地开发本仓库 demo 时可以使用相对路径：
+## Core Concepts
 
-```md
----
-addons:
-  - ./
----
-```
+A counter is identified by an `id`. Each counter keeps its own state and does not affect other counters.
 
-## 基本概念
-
-一个 counter 由 `id` 标识。每个 counter 都有自己的状态，互不影响。
-
-一个 counter 可以有任意多个 level。level 是从 `1` 开始的正整数，通常用来表达层级：
+A counter can have any number of levels. Levels are positive integers starting from `1` and usually represent hierarchy:
 
 ```text
-level 1 -> 章
-level 2 -> 节
-level 3 -> 小节
+level 1 -> chapter
+level 2 -> section
+level 3 -> subsection
 ```
 
-每次遇到 `<Counter>` 或 `<CounterInc>` 时，对应 level 的计数会加一。默认情况下，递增较浅层级会重置更深层级。例如先得到 `1.2`，再递增 level 1，会变成 `2`，后续 level 2 会从 `2.1` 开始。
+Every `<Counter>` or `<CounterInc>` increments the selected level. By default, incrementing a shallower level resets deeper levels. For example, after `1.2`, incrementing level 1 produces `2`, and the next level 2 value starts at `2.1`.
 
-## 配置文件
+## Config File
 
-在 Slidev 入口文件同目录创建 `slidev-addon-counter.config.ts`。插件会自动加载这个文件。
+Create `slidev-addon-counter.config.ts` next to the Slidev entry file. The addon loads it automatically.
 
 ```ts
 import { defineCounterConfig } from "slidev-addon-counter/config";
@@ -58,13 +51,13 @@ export default defineCounterConfig({
           level: 1,
           alias: "chapter",
           style: "decimal",
-          format: "第 %{:value} 章",
+          format: "Chapter %{:value}",
         },
         {
           level: 2,
           alias: "section",
           style: "decimal",
-          format: "%{@-1:full}第 %{:value} 节",
+          format: "%{@-1:full}.%{:value}",
         },
       ],
     },
@@ -72,14 +65,14 @@ export default defineCounterConfig({
 });
 ```
 
-如果没有配置文件，插件会创建一个名为 `default` 的默认 counter。默认 counter 支持任意层级：
+If there is no config file, the addon creates a `default` counter. The default counter supports any level:
 
 ```md
 <Counter :level="1" />
 <Counter :level="2" />
 ```
 
-如果提供了配置文件，并且使用了省略 `id` 的组件，需要显式声明 `default`：
+If you do provide a config file and still use components without `id`, declare `default` explicitly:
 
 ```ts
 export default defineCounterConfig({
@@ -87,9 +80,9 @@ export default defineCounterConfig({
 });
 ```
 
-## Counter 配置
+## Counter Config
 
-顶层配置字段：
+Top-level config:
 
 ```ts
 export default defineCounterConfig({
@@ -102,93 +95,93 @@ export default defineCounterConfig({
 });
 ```
 
-`counters` 可选。不提供时等价于 `{ counters: [{ id: "default" }] }`。
+`counters` is optional. If omitted, it behaves like `{ counters: [{ id: "default" }] }`.
 
-每个 counter：
+Each counter:
 
-| 字段     | 类型                   | 必填 | 说明                                                                 |
-| -------- | ---------------------- | ---- | -------------------------------------------------------------------- |
-| `id`     | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                 |
-| `levels` | `CounterLevelConfig[]` | 否   | 指定某些层级的格式、别名、样式和重置规则。未声明的层级使用默认规则。 |
+| Field    | Type                   | Required | Description                                                                                           |
+| -------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `id`     | `string`               | Yes      | Counter name. Components reference it through `id`.                                                   |
+| `levels` | `CounterLevelConfig[]` | No       | Configures selected levels with formats, aliases, styles, and reset rules. Other levels use defaults. |
 
-`id` 必须是非空字符串，不能重复。
+`id` must be a non-empty string and cannot be duplicated.
 
-## Level 配置
+## Level Config
 
-每个 level 支持这些字段：
+Each level supports these fields:
 
-| 字段     | 类型                | 默认值                                                   | 说明                                 |
-| -------- | ------------------- | -------------------------------------------------------- | ------------------------------------ |
-| `level`  | `number`            | 无                                                       | 正整数层级，从 `1` 开始。            |
-| `alias`  | `string`            | 无                                                       | 层级别名，可在组件和格式引用中使用。 |
-| `style`  | `CounterStyle`      | `"decimal"`                                              | 当前层级的编号样式。                 |
-| `format` | `string`            | level 1 为 `%{:value}`，更深层为 `%{@-1:full}.%{:value}` | 当前层级完整显示文本。               |
-| `reset`  | `"lower" \| "none"` | `"lower"`                                                | 当前层级递增后是否重置更深层级。     |
+| Field    | Type                | Default                                                      | Description                                           |
+| -------- | ------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
+| `level`  | `number`            | None                                                         | Positive integer level, starting from `1`.            |
+| `alias`  | `string`            | None                                                         | Level alias for component props and format refs.      |
+| `style`  | `CounterStyle`      | `"decimal"`                                                  | Number style for this level.                          |
+| `format` | `string`            | level 1: `%{:value}`; deeper levels: `%{@-1:full}.%{:value}` | Full display text for this level.                     |
+| `reset`  | `"lower" \| "none"` | `"lower"`                                                    | Whether incrementing this level resets deeper levels. |
 
-未声明的 level 仍然可用，会使用默认配置。例如只声明 level 1 后，仍然可以使用 `level={2}`，显示格式默认为 `1.1`。
+Unconfigured levels are still usable. For example, if you only configure level 1, `level={2}` still works and defaults to the `1.1` style.
 
-`alias` 必须类似标识符，例如 `chapter`、`section_2`、`theorem-main`。不能使用纯数字、`@` 开头的字符串或包含 `:` 的字符串。
+`alias` must be identifier-like, such as `chapter`, `section_2`, or `theorem-main`. It cannot be all digits, start with `@`, or contain `:`.
 
-## 组件
+## Components
 
 ### `<Counter>`
 
-递增或显示一个 counter。
+Increments or displays a counter.
 
 ```md
 <Counter id="section" level="chapter" />
 <Counter id="section" :level="2" />
 ```
 
-Props：
+Props:
 
-| prop     | 类型                                 | 默认值      | 说明                           |
-| -------- | ------------------------------------ | ----------- | ------------------------------ |
-| `id`     | `string`                             | `"default"` | counter 名称。                 |
-| `level`  | `number \| string`                   | 无          | 必填。可以是数字层级或 alias。 |
-| `action` | `"step" \| "increment" \| "display"` | `"step"`    | 本次操作类型。                 |
+| Prop     | Type                                 | Default     | Description                         |
+| -------- | ------------------------------------ | ----------- | ----------------------------------- |
+| `id`     | `string`                             | `"default"` | Counter name.                       |
+| `level`  | `number \| string`                   | None        | Required. Number level or alias.    |
+| `action` | `"step" \| "increment" \| "display"` | `"step"`    | Operation type for this occurrence. |
 
-`action` 的含义：
+Actions:
 
-| action      | 行为                         |
-| ----------- | ---------------------------- |
-| `step`      | 先递增，再显示递增后的编号。 |
-| `increment` | 只递增，不渲染文本。         |
-| `display`   | 不递增，只显示当前编号。     |
+| Action      | Behavior                                        |
+| ----------- | ----------------------------------------------- |
+| `step`      | Increment first, then display the new value.    |
+| `increment` | Increment only and render no text.              |
+| `display`   | Display the current value without incrementing. |
 
 ### `<CounterInc>`
 
-`<CounterInc>` 是 `<Counter action="increment">` 的简写：
+`<CounterInc>` is shorthand for `<Counter action="increment">`:
 
 ```md
 <CounterInc id="theorem" level="theorem" />
 ```
 
-它会更新 counter 状态，但不会渲染文本。
+It updates the counter state but renders no text.
 
 ### `<CounterDisplay>`
 
-`<CounterDisplay>` 是 `<Counter action="display">` 的简写：
+`<CounterDisplay>` is shorthand for `<Counter action="display">`:
 
 ```md
 <CounterDisplay id="theorem" level="theorem" />
 ```
 
-它只显示当前值，不会递增。
+It only displays the current value and does not increment.
 
-## 在 Markdown 中使用
+## Use in Markdown
 
-组件可以放在标题、段落、Vue 片段或 Slidev 布局中：
+Components can be used in headings, paragraphs, Vue fragments, and Slidev layouts:
 
 ```md
 # <Counter id="section" level="chapter" /> Timers
 
 ## <Counter id="section" level="section" /> SysTick
 
-定理 <Counter id="theorem" level="theorem" />.
+Theorem <Counter id="theorem" level="theorem" />.
 ```
 
-代码块和行内代码中的组件文本不会被计数：
+Counter-looking text inside fenced code blocks or inline code is ignored:
 
 ````md
 ```vue
@@ -198,9 +191,9 @@ Props：
 `<Counter id="section" level="section" />`
 ````
 
-## 样式
+## Styling
 
-`<Counter>` 渲染的是纯文本，不会额外生成 HTML 包裹元素。需要样式时，请自己包一层元素：
+`<Counter>` renders plain text and does not create a wrapper element. Wrap it yourself when you need styling:
 
 ```md
 <span class="text-sky-600 font-bold">
@@ -208,27 +201,27 @@ Props：
 </span>
 ```
 
-这也意味着它适合直接组合进标题：
+That also makes it easy to compose directly in headings:
 
 ```md
-# <Counter id="section" level="chapter" /> 绪论
+# <Counter id="section" level="chapter" /> Introduction
 ```
 
-## 编号样式
+## Number Styles
 
-`style` 控制 `%{...:value}` 的显示方式。
+`style` controls how `%{...:value}` is displayed.
 
-| style         | 示例               | 说明                           |
-| ------------- | ------------------ | ------------------------------ |
-| `decimal`     | `1`, `2`, `12`     | 十进制数字。                   |
-| `zero`        | `01`, `02`, `12`   | 至少两位，不足补零。           |
-| `lower-alpha` | `a`, `b`, `aa`     | 小写字母序号。                 |
-| `upper-alpha` | `A`, `B`, `AA`     | 大写字母序号。                 |
-| `lower-roman` | `i`, `ii`, `xiv`   | 小写罗马数字，范围 `1..3999`。 |
-| `upper-roman` | `I`, `II`, `XIV`   | 大写罗马数字，范围 `1..3999`。 |
-| `cjk`         | `一`, `二`, `十二` | 中文数字，范围 `0..9999`。     |
+| Style         | Example            | Description                                |
+| ------------- | ------------------ | ------------------------------------------ |
+| `decimal`     | `1`, `2`, `12`     | Decimal digits.                            |
+| `zero`        | `01`, `02`, `12`   | At least two digits, padded with zero.     |
+| `lower-alpha` | `a`, `b`, `aa`     | Lowercase alphabetic sequence.             |
+| `upper-alpha` | `A`, `B`, `AA`     | Uppercase alphabetic sequence.             |
+| `lower-roman` | `i`, `ii`, `xiv`   | Lowercase Roman numerals, range `1..3999`. |
+| `upper-roman` | `I`, `II`, `XIV`   | Uppercase Roman numerals, range `1..3999`. |
+| `cjk`         | `一`, `二`, `十二` | Chinese numerals, range `0..9999`.         |
 
-示例：
+Example:
 
 ```ts
 export default defineCounterConfig({
@@ -252,68 +245,68 @@ export default defineCounterConfig({
 <Counter id="theorem" level="theorem" />
 ```
 
-输出：
+Output:
 
 ```text
 Theorem I
 ```
 
-## Format 占位符
+## Format Placeholders
 
-`format` 使用 `%{ref:kind}` 占位符。
+`format` uses `%{ref:kind}` placeholders.
 
-`ref` 表示引用哪个层级，`kind` 表示渲染哪种值。
+`ref` selects a level. `kind` selects what to render from that level.
 
-### ref 写法
+### Ref Syntax
 
-| ref      | 示例             | 说明                                          |
-| -------- | ---------------- | --------------------------------------------- |
-| 空       | `%{:value}`      | 当前层级，等价于 `%{@0:value}`。              |
-| 数字     | `%{1:value}`     | 指定数字层级。                                |
-| 相对层级 | `%{@-1:full}`    | 相对当前层级。`@-1` 是上一层，`@0` 是当前层。 |
-| alias    | `%{chapter:raw}` | 引用配置中的层级别名。                        |
+| Ref            | Example          | Description                                         |
+| -------------- | ---------------- | --------------------------------------------------- |
+| Empty          | `%{:value}`      | Current level, equivalent to `%{@0:value}`.         |
+| Number         | `%{1:value}`     | Specific numeric level.                             |
+| Relative level | `%{@-1:full}`    | Relative to the current level. `@-1` is the parent. |
+| Alias          | `%{chapter:raw}` | Level alias from config.                            |
 
-### kind 写法
+### Kind Syntax
 
-| kind    | 示例          | 说明                                  |
-| ------- | ------------- | ------------------------------------- |
-| `value` | `%{:value}`   | 按被引用层级的 `style` 格式化后的值。 |
-| `raw`   | `%{:raw}`     | 原始数字值，不使用 `style`。          |
-| `full`  | `%{@-1:full}` | 被引用层级的完整 `format` 输出。      |
+| Kind    | Example       | Description                                      |
+| ------- | ------------- | ------------------------------------------------ |
+| `value` | `%{:value}`   | Value formatted with the referenced level style. |
+| `raw`   | `%{:raw}`     | Raw numeric value, without `style`.              |
+| `full`  | `%{@-1:full}` | Full `format` output of the referenced level.    |
 
-`full` 只能引用更浅层级，不能引用当前层级或更深层级，否则会形成递归或不稳定格式。
+`full` can only reference shallower levels. It cannot reference the current level or deeper levels because that would be recursive or unstable.
 
-常见二级标题格式：
+Common two-level format:
 
 ```ts
 {
   level: 1,
   alias: "chapter",
-  format: "第 %{:value} 章",
+  format: "Chapter %{:value}",
 },
 {
   level: 2,
   alias: "section",
-  format: "%{@-1:full}第 %{:value} 节",
+  format: "%{@-1:full}.%{:value}",
 }
 ```
 
-如果当前状态是 `[2, 3]`，level 2 输出：
+If the current state is `[2, 3]`, level 2 outputs:
 
 ```text
-第 2 章第 3 节
+Chapter 2.3
 ```
 
-## 默认格式
+## Default Format
 
-未配置 `format` 时：
+When `format` is omitted:
 
 ```text
 level 1: %{:value}
 level 2+: %{@-1:full}.%{:value}
 ```
 
-因此默认多级 counter 会输出：
+So a default multi-level counter outputs:
 
 ```md
 <Counter id="demo" :level="1" />
@@ -327,11 +320,11 @@ level 2+: %{@-1:full}.%{:value}
 1.1.1
 ```
 
-## 重置规则
+## Reset Rules
 
-`reset` 决定当前层级递增时，是否清除更深层级。
+`reset` controls whether incrementing the current level clears deeper levels.
 
-默认值是 `"lower"`：
+The default is `"lower"`:
 
 ```ts
 {
@@ -340,7 +333,7 @@ level 2+: %{@-1:full}.%{:value}
 }
 ```
 
-行为示例：
+Behavior:
 
 ```text
 1
@@ -350,7 +343,7 @@ level 2+: %{@-1:full}.%{:value}
 2.1
 ```
 
-如果设置为 `"none"`，递增当前层级时会保留更深层级状态：
+With `"none"`, deeper-level state is preserved when the current level increments:
 
 ```ts
 {
@@ -359,11 +352,11 @@ level 2+: %{@-1:full}.%{:value}
 }
 ```
 
-这适合少数需要跨父级延续子编号的场景。大多数章节、小节编号应使用默认的 `"lower"`。
+Use `"none"` only for cases where child numbering should continue across parent changes. Most chapter and section counters should keep the default `"lower"`.
 
-## 多个 counter
+## Multiple Counters
 
-不同 `id` 的 counter 独立维护状态：
+Counters with different `id` values keep independent state:
 
 ```ts
 export default defineCounterConfig({
@@ -391,7 +384,7 @@ export default defineCounterConfig({
 <Counter id="theorem" level="theorem" />
 ```
 
-可能输出：
+Possible output:
 
 ```text
 1
@@ -400,9 +393,9 @@ Theorem I
 Theorem II
 ```
 
-## Level 引用方式
+## Level References in Components
 
-组件的 `level` 可以写成静态字符串、数字绑定或字符串绑定：
+The component `level` prop can be a static string, numeric binding, or string binding:
 
 ```md
 <Counter id="section" level="chapter" />
@@ -411,11 +404,11 @@ Theorem II
 <Counter id="section" :level="'section'" />
 ```
 
-注意：`:level` 只支持字符串或数字字面量。不要传入运行时变量，因为插件需要在构建时扫描 slides 并计算完整时间线。
+`:level` only supports string or number literals. Do not pass runtime variables, because the addon scans slides and builds the complete counter timeline at build time.
 
-## 常见模式
+## Common Patterns
 
-### 章节和小节
+### Chapters and Sections
 
 ```ts
 export default defineCounterConfig({
@@ -426,12 +419,12 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "chapter",
-          format: "第 %{:value} 章",
+          format: "Chapter %{:value}",
         },
         {
           level: 2,
           alias: "section",
-          format: "%{@-1:full}第 %{:value} 节",
+          format: "%{@-1:full}.%{:value}",
         },
       ],
     },
@@ -440,12 +433,12 @@ export default defineCounterConfig({
 ```
 
 ```md
-# <Counter id="section" level="chapter" /> 绪论
+# <Counter id="section" level="chapter" /> Introduction
 
-## <Counter id="section" level="section" /> 背景
+## <Counter id="section" level="section" /> Background
 ```
 
-### 定理编号
+### Theorem Numbers
 
 ```ts
 export default defineCounterConfig({
@@ -469,31 +462,31 @@ export default defineCounterConfig({
 <Counter id="theorem" level="theorem" />
 ```
 
-### 只递增，再稍后显示
+### Increment Now, Display Later
 
 ```md
 <CounterInc id="theorem" level="theorem" />
 
-当前定理编号：<CounterDisplay id="theorem" level="theorem" />
+Current theorem number: <CounterDisplay id="theorem" level="theorem" />
 ```
 
-## 限制和注意事项
+## Limitations and Notes
 
-`level` 是必填 prop。缺少 `level` 会在构建时抛错。
+`level` is required. Missing `level` causes a build-time error.
 
-counter `id` 必须已经在配置中定义。唯一例外是完全没有配置文件时，插件会自动提供 `default`。
+Counter `id` values must be defined in config. The only exception is when there is no config file; then the addon provides `default` automatically.
 
-同一个 counter 内不能重复定义 level，也不能重复定义 alias。
+Levels and aliases cannot be duplicated within the same counter.
 
-`format` 占位符必须包含冒号，例如 `%{:value}`。`%{value}` 是无效写法。
+`format` placeholders must include a colon, such as `%{:value}`. `%{value}` is invalid.
 
-`full` 不能引用当前层级或更深层级。例如 level 2 的 `format` 中可以使用 `%{@-1:full}`，但不能使用 `%{:full}` 或 `%{@+1:full}`。
+`full` cannot reference the current level or deeper levels. In a level 2 `format`, `%{@-1:full}` is valid, but `%{:full}` and `%{@+1:full}` are not.
 
-Roman 样式只支持 `1..3999`。CJK 样式支持 `0..9999`。正常递增不会产生 `0`，但 `display` 在尚未递增时可能显示当前层级的 `0`。
+Roman styles support `1..3999`. CJK style supports `0..9999`. Normal increments do not produce `0`, but `display` can show `0` if the selected level has not been incremented yet.
 
 ## TypeScript API
 
-配置文件可以从 `slidev-addon-counter/config` 导入类型和辅助函数：
+Config files can import helpers and types from `slidev-addon-counter/config`:
 
 ```ts
 import {
@@ -506,7 +499,7 @@ import {
 } from "slidev-addon-counter/config";
 ```
 
-通常只需要使用 `defineCounterConfig`：
+Most configs only need `defineCounterConfig`:
 
 ```ts
 export default defineCounterConfig({
