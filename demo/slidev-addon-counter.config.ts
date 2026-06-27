@@ -17,7 +17,7 @@ export default defineCounterConfig({
         {
           level: 2,
           format: "%{@-1:full}%{:value}.",
-        }
+        },
       ],
     },
 

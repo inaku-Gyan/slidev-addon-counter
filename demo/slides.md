@@ -367,7 +367,7 @@ const levels = [
 ```text
 %{:value}         current level value
 %{@-1:full}       parent level full text
-%{chapter:raw}    parent raw number by alias
+%{chapter:raw}    raw number by alias
 ```
 
 `full` lets a child level include the formatted parent label.
