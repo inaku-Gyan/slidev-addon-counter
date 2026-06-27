@@ -76,3 +76,12 @@ jobs:
         with:
           generate_release_notes: true
           prerelease: ${{ needs.check-tag.outputs.prerelease == 'true' }}
+
+  deploy-demo:
+    name: deploy demo
+    needs: github-release
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

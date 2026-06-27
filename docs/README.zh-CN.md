@@ -4,6 +4,8 @@
 
 Slidev 的多级计数器插件，适合生成章节号、小节号、定理编号等可复用编号。
 
+[在线示例](https://inaku-Gyan.github.io/slidev-addon-counter/)
+
 ## 安装
 
 ```bash

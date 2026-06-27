@@ -4,6 +4,8 @@ English | [中文](./docs/README.zh-CN.md)
 
 Multi-level counters for Slidev, useful for chapter, section, theorem, and other reusable numbers.
 
+[Live demo](https://inaku-Gyan.github.io/slidev-addon-counter/)
+
 ## Install
 
 ```bash
