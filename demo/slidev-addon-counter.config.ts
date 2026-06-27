@@ -5,14 +5,6 @@ export default defineCounterConfig({
     // Demo-only counters used to structure this teaching deck.
     {
       id: "demoSection",
-      defaultLevel: "section",
-      levels: [
-        {
-          level: 1,
-          alias: "section",
-          format: "%{:value}",
-        },
-      ],
     },
     {
       id: "demoExample",
@@ -21,7 +13,7 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "example",
-          format: "Example %{:value}",
+          format: "Example %{:value}.",
         },
       ],
     },
@@ -39,12 +31,10 @@ export default defineCounterConfig({
         {
           level: 2,
           alias: "section",
-          format: "%{@-1:full}.%{:value}",
         },
         {
           level: 3,
           alias: "subsection",
-          format: "%{@-1:full}.%{:value}",
         },
       ],
     },
