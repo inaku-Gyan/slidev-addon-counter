@@ -8,13 +8,16 @@ export default defineCounterConfig({
     },
     {
       id: "demoExample",
-      defaultLevel: "example",
+      defaultLevel: 2,
       levels: [
         {
           level: 1,
-          alias: "example",
           format: "Example %{:value}.",
         },
+        {
+          level: 2,
+          format: "%{@-1:full}%{:value}.",
+        }
       ],
     },
 

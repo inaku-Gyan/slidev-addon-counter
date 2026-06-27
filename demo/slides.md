@@ -54,18 +54,21 @@ need custom counters.
 </div>
 
 ---
+layout: section
+---
 
-# <Counter id="demoExample" /> Default counter with no `id`
+# <Counter id="demoSection" /> Examples
+
+---
+
+## <Counter id="demoExample" :level="1" /> Default counter with no `id`
 
 <div class="example-grid">
   <div class="example-panel">
 
 **Config**
 
-```ts
-// Automatic, even when the config defines other counters.
-const counters = [];
-```
+No any config is needed for the default counter. You don't even need to create a `slidev-addon-counter.config.ts` file.
 
   </div>
   <div class="example-panel">
@@ -100,7 +103,9 @@ Current top level <Counter action="display" />
 
 ---
 
-# <Counter id="demoExample" /> Section counter: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Section counter: config
 
 <div class="example-panel wide-panel">
 
@@ -122,7 +127,7 @@ const sectionCounter = {
 
 ---
 
-# <CounterDisplay id="demoExample" /> Section counter: usage and output
+## <Counter id="demoExample" /> Section counter: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -161,7 +166,9 @@ const sectionCounter = {
 
 ---
 
-# <Counter id="demoExample" /> Roman theorem counter: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Roman theorem counter: config
 
 <div class="example-panel wide-panel">
 
@@ -187,7 +194,7 @@ The `style` field formats the current value before it is inserted into
 
 ---
 
-# <CounterDisplay id="demoExample" /> Roman theorem counter: usage and output
+## <Counter id="demoExample" /> Roman theorem counter: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -218,7 +225,9 @@ Current theorem: <CounterDisplay id="theorem" />
 
 ---
 
-# <Counter id="demoExample" /> Independent counters: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Independent counters: config
 
 <div class="example-panel wide-panel">
 
@@ -236,7 +245,7 @@ slide.
 
 ---
 
-# <CounterDisplay id="demoExample" /> Independent counters: usage and output
+## <Counter id="demoExample" /> Independent counters: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -271,7 +280,9 @@ Theorem <Counter id="theorem" />
 
 ---
 
-# <Counter id="demoExample" /> Increment now, display later: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Increment now, display later: config
 
 <div class="example-panel wide-panel">
 
@@ -289,7 +300,7 @@ Use this pattern when the number is reserved in one place and shown elsewhere.
 
 ---
 
-# <CounterDisplay id="demoExample" /> Increment now, display later: usage and output
+## <Counter id="demoExample" /> Increment now, display later: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -324,7 +335,9 @@ Next: <Counter id="claim" action="step" />
 
 ---
 
-# <Counter id="demoExample" /> Multi-level placeholders: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Multi-level placeholders: config
 
 <div class="two-col">
   <div class="example-panel">
@@ -352,9 +365,9 @@ const levels = [
 **Placeholder meaning**
 
 ```text
-%{:value}      current level value
-%{@-1:full}   parent level full text
-%{chapter:raw} parent raw number by alias
+%{:value}         current level value
+%{@-1:full}       parent level full text
+%{chapter:raw}    parent raw number by alias
 ```
 
 `full` lets a child level include the formatted parent label.
@@ -364,9 +377,9 @@ const levels = [
 
 ---
 
-# <CounterDisplay id="demoExample" /> Multi-level placeholders: usage and output
+## <Counter id="demoExample" /> Multi-level placeholders: usage and output
 
-<div class="two-col">
+<div class="two-cols">
   <div class="example-panel">
 
 **Slide source**
@@ -395,7 +408,9 @@ const levels = [
 
 ---
 
-# <Counter id="demoExample" /> Reset behavior: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Reset behavior: config
 
 <div class="example-panel wide-panel">
 
@@ -416,7 +431,7 @@ const taskFlowCounter = {
 
 ---
 
-# <CounterDisplay id="demoExample" /> Reset behavior: usage and output
+## <Counter id="demoExample" /> Reset behavior: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -451,7 +466,9 @@ const taskFlowCounter = {
 
 ---
 
-# <Counter id="demoExample" /> Chinese chapter and section: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Chinese chapter and section: config
 
 <div class="example-panel wide-panel">
 
@@ -473,12 +490,9 @@ const cnSectionCounter = {
 
 </div>
 
-Use localized labels and styles when a deck follows a language-specific numbering
-convention.
-
 ---
 
-# <CounterDisplay id="demoExample" /> Chinese chapter and section: usage and output
+## <Counter id="demoExample" /> Chinese chapter and section: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -509,7 +523,9 @@ convention.
 
 ---
 
-# <Counter id="demoExample" /> Styling and heading composition: config
+<CounterInc id="demoExample" :level="1" />
+
+## <Counter id="demoExample" /> Styling and heading composition: config
 
 <div class="example-panel wide-panel">
 
@@ -527,7 +543,7 @@ Counters render plain text, so wrap them yourself when you need styling.
 
 ---
 
-# <CounterDisplay id="demoExample" /> Styling and heading composition: usage and output
+## <Counter id="demoExample" /> Styling and heading composition: usage and output
 
 <div class="two-col">
   <div class="example-panel">
@@ -560,7 +576,7 @@ How does <code>HAL_Delay</code> work?
 
 ---
 
-# <Counter id="demoExample" /> Code fences are inert
+## <Counter id="demoExample" :level="1" /> Code fences are inert
 
 <div class="example-grid">
   <div class="example-panel">
