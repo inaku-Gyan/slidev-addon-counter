@@ -72,7 +72,7 @@ export default defineCounterConfig({
 <Counter :level="2" />
 ```
 
-如果提供了配置文件，并且使用了省略 `id` 的组件，需要显式声明 `default`：
+如果定义了自定义 counters，并且还使用省略 `id` 的组件，需要显式声明 `default`：
 
 ```ts
 export default defineCounterConfig({
@@ -97,14 +97,14 @@ export default defineCounterConfig({
 
 `counters` 可选。不提供时等价于 `{ counters: [{ id: "default" }] }`。
 
-每个 counter：
+每个已配置的 counter 定义：
 
 | 字段     | 类型                   | 必填 | 说明                                                                 |
 | -------- | ---------------------- | ---- | -------------------------------------------------------------------- |
 | `id`     | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                 |
 | `levels` | `CounterLevelConfig[]` | 否   | 指定某些层级的格式、别名、样式和重置规则。未声明的层级使用默认规则。 |
 
-`id` 必须是非空字符串，不能重复。
+配置里的 `id` 必须是非空字符串，不能重复。这个要求只适用于 `counters` 里的 counter 定义；组件的 `id` prop 是可选的，默认值为 `"default"`。
 
 ## Level 配置
 
@@ -140,6 +140,8 @@ Props：
 | `id`     | `string`                             | `"default"` | counter 名称。                 |
 | `level`  | `number \| string`                   | 无          | 必填。可以是数字层级或 alias。 |
 | `action` | `"step" \| "increment" \| "display"` | `"step"`    | 本次操作类型。                 |
+
+省略 `id` 时，组件会使用 `default` counter。这个 counter 会在省略 `counters` 时自动存在，也可以通过 `{ id: "default" }` 显式声明。
 
 `action` 的含义：
 

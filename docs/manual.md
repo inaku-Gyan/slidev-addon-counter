@@ -72,7 +72,7 @@ If there is no config file, the addon creates a `default` counter. The default c
 <Counter :level="2" />
 ```
 
-If you do provide a config file and still use components without `id`, declare `default` explicitly:
+If you define custom counters and still use components without `id`, declare `default` explicitly:
 
 ```ts
 export default defineCounterConfig({
@@ -97,14 +97,14 @@ export default defineCounterConfig({
 
 `counters` is optional. If omitted, it behaves like `{ counters: [{ id: "default" }] }`.
 
-Each counter:
+Each configured counter definition:
 
 | Field    | Type                   | Required | Description                                                                                           |
 | -------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
 | `id`     | `string`               | Yes      | Counter name. Components reference it through `id`.                                                   |
 | `levels` | `CounterLevelConfig[]` | No       | Configures selected levels with formats, aliases, styles, and reset rules. Other levels use defaults. |
 
-`id` must be a non-empty string and cannot be duplicated.
+Config `id` must be a non-empty string and cannot be duplicated. This requirement applies to counter definitions in `counters`; component `id` props are optional and default to `"default"`.
 
 ## Level Config
 
@@ -140,6 +140,8 @@ Props:
 | `id`     | `string`                             | `"default"` | Counter name.                       |
 | `level`  | `number \| string`                   | None        | Required. Number level or alias.    |
 | `action` | `"step" \| "increment" \| "display"` | `"step"`    | Operation type for this occurrence. |
+
+If `id` is omitted, the component uses the `default` counter. That counter exists automatically when `counters` is omitted, or when it is declared explicitly as `{ id: "default" }`.
 
 Actions:
 
