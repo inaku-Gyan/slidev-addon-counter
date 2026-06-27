@@ -5,7 +5,7 @@ addons:
 title: Slidev Addon Counter
 ---
 
-# Slidev Addon Counter
+# Counter
 
 Multi-level counters for Slidev decks.
 
@@ -34,24 +34,21 @@ need custom counters.
 
 # <Counter id="demoSection" /> Core concepts
 
-<div class="concept-grid">
-  <div>
-    <h3>Counter id</h3>
-    <p>Each <code>id</code> has independent state.</p>
-  </div>
-  <div>
-    <h3>Level</h3>
-    <p>Levels model hierarchy: chapter, section, subsection.</p>
-  </div>
-  <div>
-    <h3>Action</h3>
-    <p><code>step</code> increments and displays. <code>increment</code> and <code>display</code> split those actions.</p>
-  </div>
-  <div>
-    <h3>Format</h3>
-    <p>Formats turn raw numbers into labels such as <code>Chapter 1.2</code> or <code>第一章</code>.</p>
-  </div>
-</div>
+## Counter id
+
+Each `id` has independent state.
+
+## Level
+
+Levels model hierarchy: chapter, section, subsection.
+
+## Action
+
+`step` increments and displays. `increment` and `display` split those actions.
+
+## Format
+
+Formats turn raw numbers into labels such as `Chapter 1.2` or `第一章`.
 
 ---
 layout: section
@@ -63,17 +60,10 @@ layout: section
 
 ## <Counter id="demoExample" :level="1" /> Default counter with no `id`
 
-<div class="example-grid">
-  <div class="example-panel">
+No config is needed for the default counter. You do not need to create a
+`slidev-addon-counter.config.ts` file.
 
-**Config**
-
-No any config is needed for the default counter. You don't even need to create a `slidev-addon-counter.config.ts` file.
-
-  </div>
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 Intro <Counter />
@@ -85,10 +75,7 @@ Current topic <CounterDisplay :level="2" />
 Current top level <Counter action="display" />
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
-
-**Rendered**
+### Rendered
 
 Intro <Counter />
 
@@ -98,16 +85,11 @@ Current topic <CounterDisplay :level="2" />
 
 Current top level <Counter action="display" />
 
-  </div>
-</div>
-
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Section counter: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const sectionCounter = {
@@ -121,18 +103,13 @@ const sectionCounter = {
 };
 ```
 
-</div>
-
 `defaultLevel: "section"` means `<Counter id="section" />` uses level 2.
 
 ---
 
 ## <Counter id="demoExample" /> Section counter: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 # <Counter id="section" level="chapter" /> Introduction
@@ -146,31 +123,23 @@ const sectionCounter = {
 ### <Counter id="section" :level="3" /> More details
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
+### Rendered
 
-**Rendered**
+# <Counter id="section" level="chapter" /> Introduction
 
-<p class="h1-like"><Counter id="section" level="chapter" /> Introduction</p>
+## <Counter id="section" /> Background
 
-<p class="h2-like"><Counter id="section" /> Background</p>
+## <Counter id="section" :level="2" /> Setup
 
-<p class="h2-like"><Counter id="section" :level="2" /> Setup</p>
+### <Counter id="section" level="subsection" /> Details
 
-<p class="h3-like"><Counter id="section" level="subsection" /> Details</p>
-
-<p class="h3-like"><Counter id="section" :level="3" /> More details</p>
-
-  </div>
-</div>
+### <Counter id="section" :level="3" /> More details
 
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Roman theorem counter: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const theoremCounter = {
@@ -187,8 +156,6 @@ const theoremCounter = {
 };
 ```
 
-</div>
-
 The `style` field formats the current value before it is inserted into
 `%{:value}`.
 
@@ -196,40 +163,37 @@ The `style` field formats the current value before it is inserted into
 
 ## <Counter id="demoExample" /> Roman theorem counter: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
-<Counter id="theorem" /> Compactness
+**<Counter id="theorem" />** Compactness
+<br/>
+**<Counter id="theorem" level="theorem" />** Completeness
+<br/>
+Current theorem: *<CounterDisplay id="theorem" />*
 
-<Counter id="theorem" level="theorem" /> Completeness
+Next: <Counter id="theorem"/>
 
-Current theorem: <CounterDisplay id="theorem" />
+Next: <Counter id="theorem" action="step" />
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
+### Rendered
 
-**Rendered**
+**<Counter id="theorem" />** Compactness
+<br/>
+**<Counter id="theorem" level="theorem" />** Completeness
+<br/>
+Current theorem: *<CounterDisplay id="theorem" />*
 
-<Counter id="theorem" /> Compactness
+Next: <Counter id="theorem"/>
 
-<Counter id="theorem" level="theorem" /> Completeness
-
-Current theorem: <CounterDisplay id="theorem" />
-
-  </div>
-</div>
+Next: <Counter id="theorem" action="step" />
 
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Independent counters: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const counters = [
@@ -238,8 +202,6 @@ const counters = [
 ];
 ```
 
-</div>
-
 Different `id` values keep separate timelines, even when they appear on the same
 slide.
 
@@ -247,10 +209,7 @@ slide.
 
 ## <Counter id="demoExample" /> Independent counters: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 Section <Counter id="section" />
@@ -262,10 +221,7 @@ Section <Counter id="section" />
 Theorem <Counter id="theorem" />
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
-
-**Rendered**
+### Rendered
 
 Section <Counter id="section" />
 
@@ -274,17 +230,12 @@ Theorem <Counter id="theorem" />
 Section <Counter id="section" />
 
 Theorem <Counter id="theorem" />
-
-  </div>
-</div>
 
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Increment now, display later: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const claimCounter = {
@@ -294,18 +245,13 @@ const claimCounter = {
 };
 ```
 
-</div>
-
 Use this pattern when the number is reserved in one place and shown elsewhere.
 
 ---
 
 ## <Counter id="demoExample" /> Increment now, display later: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 <CounterInc id="claim" />
@@ -317,10 +263,7 @@ Current: <Counter id="claim" action="display" />
 Next: <Counter id="claim" action="step" />
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
-
-**Rendered**
+### Rendered
 
 <CounterInc id="claim" />
 Current: <CounterDisplay id="claim" />
@@ -330,19 +273,13 @@ Current: <Counter id="claim" action="display" />
 
 Next: <Counter id="claim" action="step" />
 
-  </div>
-</div>
-
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Multi-level placeholders: config
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Config**
+### Config
 
 ```ts
 const levels = [
@@ -359,10 +296,7 @@ const levels = [
 ];
 ```
 
-  </div>
-  <div class="example-panel">
-
-**Placeholder meaning**
+### Placeholder meaning
 
 ```text
 %{:value}         current level value
@@ -372,47 +306,33 @@ const levels = [
 
 `full` lets a child level include the formatted parent label.
 
-  </div>
-</div>
-
 ---
 
 ## <Counter id="demoExample" /> Multi-level placeholders: usage and output
 
-<div class="two-cols">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
-<Counter id="section" level="chapter" /> Format examples
+Format examples: <Counter id="section" level="chapter" />
 
-<Counter id="section" level="section" /> Parent full text
+Parent full text: <Counter id="section" level="section" />
 
-<Counter id="section" :level="2" /> Numeric level
+Numeric level: <Counter id="section" :level="2" />
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
+### Rendered
 
-**Rendered**
+Format examples: <Counter id="section" level="chapter" />
 
-<Counter id="section" level="chapter" /> Format examples
+Parent full text: <Counter id="section" level="section" />
 
-<Counter id="section" level="section" /> Parent full text
-
-<Counter id="section" :level="2" /> Numeric level
-
-  </div>
-</div>
+Numeric level: <Counter id="section" :level="2" />
 
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Reset behavior: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const taskFlowCounter = {
@@ -425,52 +345,38 @@ const taskFlowCounter = {
 };
 ```
 
-</div>
-
 `reset: "none"` preserves deeper state when the phase increments.
 
 ---
 
 ## <Counter id="demoExample" /> Reset behavior: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
-<Counter id="taskFlow" level="phase" />
-<Counter id="taskFlow" />
-<Counter id="taskFlow" />
-<Counter id="taskFlow" level="phase" />
-<Counter id="taskFlow" level="task" />
+<ul>
+<li> <Counter id="taskFlow" level="phase" /> </li>
+<li> <Counter id="taskFlow" /> </li>
+<li> <Counter id="taskFlow" /> </li>
+<li> <Counter id="taskFlow" level="phase" /> </li>
+<li> <Counter id="taskFlow" level="task" /> </li>
+</ul>
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
-
-**Rendered**
-
-<Counter id="taskFlow" level="phase" />
-
-<Counter id="taskFlow" />
-
-<Counter id="taskFlow" />
-
-<Counter id="taskFlow" level="phase" />
-
-<Counter id="taskFlow" level="task" />
-
-  </div>
-</div>
+### Rendered
+<ul>
+<li> <Counter id="taskFlow" level="phase" /> </li>
+<li> <Counter id="taskFlow" /> </li>
+<li> <Counter id="taskFlow" /> </li>
+<li> <Counter id="taskFlow" level="phase" /> </li>
+<li> <Counter id="taskFlow" level="task" /> </li>
+</ul>
 
 ---
 
 <CounterInc id="demoExample" :level="1" />
 
 ## <Counter id="demoExample" /> Chinese chapter and section: config
-
-<div class="example-panel wide-panel">
 
 ```ts
 const cnSectionCounter = {
@@ -488,16 +394,11 @@ const cnSectionCounter = {
 };
 ```
 
-</div>
-
 ---
 
 ## <Counter id="demoExample" /> Chinese chapter and section: usage and output
 
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 # <Counter id="cnSection" level="chapter" /> 绪论
@@ -507,94 +408,40 @@ const cnSectionCounter = {
 ## <Counter id="cnSection" :level="2" /> 研究方法
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
+### Rendered
 
-**Rendered**
+# <Counter id="cnSection" level="chapter" /> 绪论
 
-<p class="h1-like"><Counter id="cnSection" level="chapter" /> 绪论</p>
+## <Counter id="cnSection" /> 研究背景
 
-<p class="h2-like"><Counter id="cnSection" /> 研究背景</p>
-
-<p class="h2-like"><Counter id="cnSection" :level="2" /> 研究方法</p>
-
-  </div>
-</div>
+## <Counter id="cnSection" :level="2" /> 研究方法
 
 ---
 
-<CounterInc id="demoExample" :level="1" />
+## <Counter id="demoExample" :level="1" /> Styling and heading composition
 
-## <Counter id="demoExample" /> Styling and heading composition: config
+Counters render plain text, so compose them with regular Markdown when you need
+styling.
 
-<div class="example-panel wide-panel">
-
-```ts
-const sectionCounter = {
-  id: "section",
-  defaultLevel: "section",
-  levels: sectionLevels,
-};
-```
-
-</div>
-
-Counters render plain text, so wrap them yourself when you need styling.
-
----
-
-## <Counter id="demoExample" /> Styling and heading composition: usage and output
-
-<div class="two-col">
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ```md
 ## <Counter id="section" /> Timers
 
-<span class="text-sky-600 font-bold">
-  <Counter id="section" />
-</span>
-How does `HAL_Delay` work?
+**<Counter id="section" level="subsection" />** How does `HAL_Delay` work?
 ```
 
-  </div>
-  <div class="example-panel rendered-panel">
+### Rendered
 
-**Rendered**
+## <Counter id="section" /> Timers
 
-<p class="h2-like"><Counter id="section" /> Timers</p>
-
-<span class="text-sky-600 font-bold">
-  <Counter id="section" />
-</span>
-How does <code>HAL_Delay</code> work?
-
-  </div>
-</div>
+**<Counter id="section" level="subsection" />** How does `HAL_Delay` work?
 
 ---
 
 ## <Counter id="demoExample" :level="1" /> Code fences are inert
 
-<div class="example-grid">
-  <div class="example-panel">
-
-**Config**
-
-```ts
-const claimCounter = {
-  id: "claim",
-  defaultLevel: "claim",
-  levels: claimLevels,
-};
-```
-
-  </div>
-  <div class="example-panel">
-
-**Slide source**
+### Slide source
 
 ````md
 Before: <CounterDisplay id="claim" />
@@ -606,10 +453,7 @@ Before: <CounterDisplay id="claim" />
 After: <CounterDisplay id="claim" />
 ````
 
-  </div>
-  <div class="example-panel rendered-panel">
-
-**Rendered**
+### Rendered
 
 Before: <CounterDisplay id="claim" />
 
@@ -618,9 +462,6 @@ Before: <CounterDisplay id="claim" />
 ```
 
 After: <CounterDisplay id="claim" />
-
-  </div>
-</div>
 
 ---
 
@@ -634,75 +475,3 @@ validation rule.
 ```bash
 pnpm dev
 ```
-
-<style>
-.concept-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.concept-grid > div,
-.example-panel {
-  border: 1px solid #d4d4d8;
-  border-radius: 8px;
-  padding: 0.85rem;
-  background: #ffffff;
-}
-
-.concept-grid h3 {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.concept-grid p,
-.example-panel p {
-  margin: 0.25rem 0;
-}
-
-.two-col,
-.example-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.two-col {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.example-grid {
-  grid-template-columns: 1fr 1.18fr 0.9fr;
-}
-
-.wide-panel {
-  max-width: 50rem;
-}
-
-.rendered-panel {
-  font-size: 0.95rem;
-}
-
-.h1-like,
-.h2-like,
-.h3-like {
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.h1-like {
-  font-size: 1.45rem;
-}
-
-.h2-like {
-  font-size: 1.2rem;
-}
-
-.h3-like {
-  font-size: 1rem;
-}
-
-.slidev-layout pre {
-  max-height: 19rem;
-}
-</style>
