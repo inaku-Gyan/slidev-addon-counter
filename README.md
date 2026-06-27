@@ -46,17 +46,14 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "chapter",
-          format: "Chapter %{:value}",
         },
         {
           level: 2,
           alias: "section",
-          format: "%{@-1:full}.%{:value}",
         },
         {
           level: 3,
           alias: "subsection",
-          format: "%{@-1:full}.%{:value}",
         },
       ],
     },

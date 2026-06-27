@@ -46,17 +46,14 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "chapter",
-          format: "第 %{:value} 章",
         },
         {
           level: 2,
           alias: "section",
-          format: "%{@-1:full}第 %{:value} 节",
         },
         {
           level: 3,
           alias: "subsection",
-          format: "%{@-1:full}第 %{:value} 小节",
         },
       ],
     },
