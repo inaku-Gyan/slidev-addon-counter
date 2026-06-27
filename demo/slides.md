@@ -170,7 +170,7 @@ The `style` field formats the current value before it is inserted into
 <br/>
 **<Counter id="theorem" level="theorem" />** Completeness
 <br/>
-Current theorem: *<CounterDisplay id="theorem" />*
+Current theorem: _<CounterDisplay id="theorem" />_
 
 Next: <Counter id="theorem"/>
 
@@ -183,7 +183,7 @@ Next: <Counter id="theorem" action="step" />
 <br/>
 **<Counter id="theorem" level="theorem" />** Completeness
 <br/>
-Current theorem: *<CounterDisplay id="theorem" />*
+Current theorem: _<CounterDisplay id="theorem" />_
 
 Next: <Counter id="theorem"/>
 
@@ -364,6 +364,7 @@ const taskFlowCounter = {
 ```
 
 ### Rendered
+
 <ul>
 <li> <Counter id="taskFlow" level="phase" /> </li>
 <li> <Counter id="taskFlow" /> </li>
