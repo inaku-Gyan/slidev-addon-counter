@@ -15,4 +15,5 @@
 - Before considering work complete, run `pnpm check`.
 - Releases must follow `docs/release.md`; do not publish from a local machine unless that process is intentionally changed.
 - Before release, verify `package.json` `files` includes every public doc linked from README. The release process must run `pnpm check` and `pnpm pack --dry-run`.
+- After pushing a release tag, do not wait for GitHub Actions to fully complete unless explicitly asked. Report the run status or URL if available, and leave final workflow verification to the developer.
 - Treat build warnings as something to report, even when the command exits successfully.
