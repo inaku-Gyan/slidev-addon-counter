@@ -7,5 +7,12 @@ export default defineConfig({
     perf: "warn",
   },
   plugins: ["typescript", "vue"],
-  ignorePatterns: ["node_modules", "dist", ".slidev", "coverage"],
+  ignorePatterns: [
+    "node_modules",
+    "dist",
+    ".slidev",
+    "coverage",
+    "pnpm-lock.yaml",
+    "skills-lock.json",
+  ],
 });

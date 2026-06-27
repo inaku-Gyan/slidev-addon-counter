@@ -18,6 +18,10 @@ coverage/
 # Package artifacts
 *.tgz
 
+# Lock files
+pnpm-lock.yaml
+skills-lock.json
+
 # System files
 .DS_Store
 Thumb.db
