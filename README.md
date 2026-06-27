@@ -1,16 +1,14 @@
 # slidev-addon-counter
 
-Multi-level counters for Slidev.
+Slidev 的多级计数器插件，适合生成章节号、小节号、定理编号等可复用编号。
 
-## Usage
-
-Install the addon:
+## 安装
 
 ```bash
 pnpm add -D slidev-addon-counter
 ```
 
-Enable the addon in your Slidev deck:
+在 Slidev 首页 frontmatter 中启用插件：
 
 ```md
 ---
@@ -19,7 +17,9 @@ addons:
 ---
 ```
 
-Define counters in `slidev-addon-counter.config.ts` next to your deck entry:
+## 快速示例
+
+在幻灯片入口文件同目录创建 `slidev-addon-counter.config.ts`：
 
 ```ts
 import { defineCounterConfig } from "slidev-addon-counter/config";
@@ -32,14 +32,12 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "chapter",
-          style: "decimal",
           format: "第 %{:value} 章",
         },
         {
           level: 2,
           alias: "section",
-          style: "decimal",
-          format: "%{@-1:full}.%{:value}",
+          format: "%{@-1:full}第 %{:value} 节",
         },
       ],
     },
@@ -47,38 +45,23 @@ export default defineCounterConfig({
 });
 ```
 
-Use counters in slides:
+在 slides 中使用：
 
 ```md
-<Counter id="section" level="chapter" />
+# <Counter id="section" level="chapter" /> 绪论
 
-<Counter id="section" level="section" />
+## <Counter id="section" level="section" /> 背景
 
-<CounterInc id="theorem" level="theorem" />
-<CounterDisplay id="theorem" level="theorem" />
+当前小节：<CounterDisplay id="section" level="section" />
 ```
 
-`action="step"` increments and displays, `action="increment"` only increments,
-and `action="display"` only displays the current value.
+`<Counter>` 默认会递增并显示编号；`<CounterInc>` 只递增不显示；`<CounterDisplay>` 只显示当前编号。
 
-`<Counter>` renders plain text, not an HTML wrapper element. To style a counter,
-wrap it yourself:
+## 用户手册
 
-```md
-<span class="text-red-500">
-  <Counter id="section" level="section" />
-</span>
-```
+完整配置、格式语法、组件行为和常见问题见 [用户手册](./docs/manual.md)。
 
-Formats use `%{ref:kind}` placeholders. The `ref` may be empty for the
-current level, so `%{:value}` is equivalent to `%{@0:value}`. Use relative
-refs such as `%{@-1:full}` for parent levels, numeric refs such as
-`%{2:value}`, and aliases such as `%{chapter:raw}`.
-
-The first version supports `value`, `raw`, and `full`. A `full` placeholder may
-only reference a shallower level.
-
-## Development
+## 开发
 
 ```bash
 source ~/.nvm/nvm.sh
@@ -87,7 +70,7 @@ pnpm install
 pnpm check
 ```
 
-Preview the local addon:
+预览本地 demo：
 
 ```bash
 pnpm dev
