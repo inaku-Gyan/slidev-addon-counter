@@ -51,6 +51,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -73,7 +74,7 @@ export default defineCounterConfig({
 如果没有配置文件，插件会创建一个名为 `default` 的默认 counter。默认 counter 支持任意层级：
 
 ```md
-<Counter :level="1" />
+<Counter />
 <Counter :level="2" />
 ```
 
@@ -94,6 +95,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: 1,
       levels: [],
     },
   ],
@@ -104,10 +106,11 @@ export default defineCounterConfig({
 
 每个已配置的 counter 定义：
 
-| 字段     | 类型                   | 必填 | 说明                                                                 |
-| -------- | ---------------------- | ---- | -------------------------------------------------------------------- |
-| `id`     | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                 |
-| `levels` | `CounterLevelConfig[]` | 否   | 指定某些层级的格式、别名、样式和重置规则。未声明的层级使用默认规则。 |
+| 字段           | 类型                   | 必填 | 说明                                                                    |
+| -------------- | ---------------------- | ---- | ----------------------------------------------------------------------- |
+| `id`           | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                    |
+| `defaultLevel` | `number \| string`     | 否   | 组件省略 `level` 时使用的层级，默认是 `1`。字符串必须是已配置的 alias。 |
+| `levels`       | `CounterLevelConfig[]` | 否   | 指定某些层级的格式、别名、样式和重置规则。未声明的层级使用默认规则。    |
 
 配置里的 `id` 必须是非空字符串，不能重复。这个要求只适用于 `counters` 里的 counter 定义；组件的 `id` prop 是可选的，默认值为 `"default"`。
 
@@ -136,15 +139,18 @@ export default defineCounterConfig({
 ```md
 <Counter id="section" level="chapter" />
 <Counter id="section" :level="2" />
+<Counter id="section" />
 ```
 
 Props：
 
-| prop     | 类型                                 | 默认值      | 说明                           |
-| -------- | ------------------------------------ | ----------- | ------------------------------ |
-| `id`     | `string`                             | `"default"` | counter 名称。                 |
-| `level`  | `number \| string`                   | 无          | 必填。可以是数字层级或 alias。 |
-| `action` | `"step" \| "increment" \| "display"` | `"step"`    | 本次操作类型。                 |
+| prop     | 类型                                 | 默认值                 | 说明                           |
+| -------- | ------------------------------------ | ---------------------- | ------------------------------ |
+| `id`     | `string`                             | `"default"`            | counter 名称。                 |
+| `level`  | `number \| string`                   | counter `defaultLevel` | 可选。可以是数字层级或 alias。 |
+| `action` | `"step" \| "increment" \| "display"` | `"step"`               | 本次操作类型。                 |
+
+省略 `level` 时，组件会使用对应 counter 的 `defaultLevel`。`defaultLevel` 的后备默认值是 `1`。
 
 省略 `id` 时，组件会使用 `default` counter。这个 counter 会在省略 `counters` 时自动存在，也可以通过 `{ id: "default" }` 显式声明。
 
@@ -161,7 +167,7 @@ Props：
 `<CounterInc>` 是 `<Counter action="increment">` 的简写：
 
 ```md
-<CounterInc id="theorem" level="theorem" />
+<CounterInc id="theorem" />
 ```
 
 它会更新 counter 状态，但不会渲染文本。
@@ -171,7 +177,7 @@ Props：
 `<CounterDisplay>` 是 `<Counter action="display">` 的简写：
 
 ```md
-<CounterDisplay id="theorem" level="theorem" />
+<CounterDisplay id="theorem" />
 ```
 
 它只显示当前值，不会递增。
@@ -402,16 +408,17 @@ Theorem II
 
 ## Level 引用方式
 
-组件的 `level` 可以写成静态字符串、数字绑定或字符串绑定：
+组件可选的 `level` 可以写成静态字符串、数字绑定或字符串绑定：
 
 ```md
+<Counter id="section" />
 <Counter id="section" level="chapter" />
 <Counter id="section" level="2" />
 <Counter id="section" :level="2" />
 <Counter id="section" :level="'section'" />
 ```
 
-注意：`:level` 只支持字符串或数字字面量。不要传入运行时变量，因为插件需要在构建时扫描 slides 并计算完整时间线。
+省略 `level` 时会使用 counter 的 `defaultLevel`。注意：`:level` 只支持字符串或数字字面量。不要传入运行时变量，因为插件需要在构建时扫描 slides 并计算完整时间线。
 
 ## 常见模式
 
@@ -420,7 +427,7 @@ Theorem II
 没有配置文件，或省略 `counters` 时，可以省略 `id`，直接使用内置的 `default` counter：
 
 ```md
-# <Counter :level="1" /> 绪论
+# <Counter /> 绪论
 
 ## <Counter :level="2" /> 背景
 
@@ -434,6 +441,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -456,9 +464,9 @@ export default defineCounterConfig({
 ```md
 # <Counter id="section" level="chapter" /> 绪论
 
-## <Counter id="section" :level="2" /> 背景
+## <Counter id="section" /> 背景
 
-当前小节：<CounterDisplay id="section" level="section" />
+当前小节：<CounterDisplay id="section" />
 
 ### <Counter id="section" level="subsection" /> 细节
 
@@ -472,9 +480,11 @@ export default defineCounterConfig({
   counters: [
     {
       id: "theorem",
+      defaultLevel: "theorem",
       levels: [
         {
           level: 1,
+          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -485,28 +495,30 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" :level="1" /> Compactness
+<Counter id="theorem" /> Compactness
 
-<Counter id="theorem" :level="1" /> Completeness
+<Counter id="theorem" /> Completeness
 ```
 
 ### 只递增，再稍后显示
 
 ```md
-<CounterInc id="theorem" :level="1" />
+<CounterInc id="theorem" />
 
-当前定理编号：<CounterDisplay id="theorem" :level="1" />
+当前定理编号：<CounterDisplay id="theorem" />
 
-<Counter id="theorem" :level="1" action="increment" />
+<Counter id="theorem" action="increment" />
 
-当前定理编号：<Counter id="theorem" :level="1" action="display" />
+当前定理编号：<Counter id="theorem" action="display" />
 
-下一个定理：<Counter id="theorem" :level="1" action="step" />
+下一个定理：<Counter id="theorem" action="step" />
 ```
 
 ## 限制和注意事项
 
-`level` 是必填 prop。缺少 `level` 会在构建时抛错。
+`level` 是可选 prop。缺少 `level` 时会使用所选 counter 的 `defaultLevel`，而 `defaultLevel` 默认是 `1`。
+
+`defaultLevel` 必须是正整数、数字字符串或已配置的 alias。`@+1` 这类相对引用不能用于 `defaultLevel`。
 
 counter `id` 必须已经在配置中定义。唯一例外是完全没有配置文件时，插件会自动提供 `default`。
 

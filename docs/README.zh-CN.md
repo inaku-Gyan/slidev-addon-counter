@@ -31,7 +31,7 @@ addons:
 没有配置文件时，组件会使用内置的 `default` counter：
 
 ```md
-# <Counter :level="1" /> 绪论
+# <Counter /> 绪论
 
 ## <Counter :level="2" /> 背景
 
@@ -49,6 +49,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -68,14 +69,14 @@ export default defineCounterConfig({
 });
 ```
 
-在 slides 中可以使用 alias，也可以使用数字 level：
+在 slides 中可以使用 alias、数字 level，也可以使用已配置的默认 level：
 
 ```md
 # <Counter id="section" level="chapter" /> 绪论
 
-## <Counter id="section" :level="2" /> 背景
+## <Counter id="section" /> 背景
 
-当前小节：<CounterDisplay id="section" level="section" />
+当前小节：<CounterDisplay id="section" />
 
 ### <Counter id="section" level="subsection" /> 细节
 
@@ -91,9 +92,11 @@ export default defineCounterConfig({
   counters: [
     {
       id: "theorem",
+      defaultLevel: "theorem",
       levels: [
         {
           level: 1,
+          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -104,9 +107,9 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" :level="1" /> Compactness
+<Counter id="theorem" /> Compactness
 
-<Counter id="theorem" :level="1" /> Completeness
+<Counter id="theorem" /> Completeness
 ```
 
 ### Action 用法
@@ -114,13 +117,13 @@ export default defineCounterConfig({
 可以使用简写组件，也可以给 `<Counter>` 传 `action`：
 
 ```md
-<CounterInc id="theorem" :level="1" />
-当前定理：<CounterDisplay id="theorem" :level="1" />
+<CounterInc id="theorem" />
+当前定理：<CounterDisplay id="theorem" />
 
-<Counter id="theorem" :level="1" action="increment" />
-当前定理：<Counter id="theorem" :level="1" action="display" />
+<Counter id="theorem" action="increment" />
+当前定理：<Counter id="theorem" action="display" />
 
-下一个定理：<Counter id="theorem" :level="1" action="step" />
+下一个定理：<Counter id="theorem" action="step" />
 ```
 
 `<Counter>` 默认会递增并显示编号；`<CounterInc>` 只递增不显示；`<CounterDisplay>` 只显示当前编号。

@@ -4,6 +4,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -24,6 +25,7 @@ export default defineCounterConfig({
     },
     {
       id: "theorem",
+      defaultLevel: "theorem",
       levels: [
         {
           level: 1,

@@ -31,7 +31,7 @@ addons:
 Without a config file, components use the built-in `default` counter:
 
 ```md
-# <Counter :level="1" /> Introduction
+# <Counter /> Introduction
 
 ## <Counter :level="2" /> Background
 
@@ -49,6 +49,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -68,14 +69,14 @@ export default defineCounterConfig({
 });
 ```
 
-Use aliases or numeric levels in slides:
+Use aliases, numeric levels, or the configured default level in slides:
 
 ```md
 # <Counter id="section" level="chapter" /> Introduction
 
-## <Counter id="section" :level="2" /> Background
+## <Counter id="section" /> Background
 
-Current section: <CounterDisplay id="section" level="section" />
+Current section: <CounterDisplay id="section" />
 
 ### <Counter id="section" level="subsection" /> Details
 
@@ -91,9 +92,11 @@ export default defineCounterConfig({
   counters: [
     {
       id: "theorem",
+      defaultLevel: "theorem",
       levels: [
         {
           level: 1,
+          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -104,9 +107,9 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" :level="1" /> Compactness
+<Counter id="theorem" /> Compactness
 
-<Counter id="theorem" :level="1" /> Completeness
+<Counter id="theorem" /> Completeness
 ```
 
 ### Actions
@@ -114,13 +117,13 @@ export default defineCounterConfig({
 Use shorthand components or pass `action` to `<Counter>`:
 
 ```md
-<CounterInc id="theorem" :level="1" />
-Current theorem: <CounterDisplay id="theorem" :level="1" />
+<CounterInc id="theorem" />
+Current theorem: <CounterDisplay id="theorem" />
 
-<Counter id="theorem" :level="1" action="increment" />
-Current theorem: <Counter id="theorem" :level="1" action="display" />
+<Counter id="theorem" action="increment" />
+Current theorem: <Counter id="theorem" action="display" />
 
-Next theorem: <Counter id="theorem" :level="1" action="step" />
+Next theorem: <Counter id="theorem" action="step" />
 ```
 
 `<Counter>` increments and displays by default. `<CounterInc>` increments without rendering text. `<CounterDisplay>` displays the current value without incrementing.

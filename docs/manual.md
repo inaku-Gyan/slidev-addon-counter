@@ -51,6 +51,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -73,7 +74,7 @@ export default defineCounterConfig({
 If there is no config file, the addon creates a `default` counter. The default counter supports any level:
 
 ```md
-<Counter :level="1" />
+<Counter />
 <Counter :level="2" />
 ```
 
@@ -94,6 +95,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: 1,
       levels: [],
     },
   ],
@@ -104,10 +106,11 @@ export default defineCounterConfig({
 
 Each configured counter definition:
 
-| Field    | Type                   | Required | Description                                                                                           |
-| -------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `id`     | `string`               | Yes      | Counter name. Components reference it through `id`.                                                   |
-| `levels` | `CounterLevelConfig[]` | No       | Configures selected levels with formats, aliases, styles, and reset rules. Other levels use defaults. |
+| Field          | Type                   | Required | Description                                                                                           |
+| -------------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `id`           | `string`               | Yes      | Counter name. Components reference it through `id`.                                                   |
+| `defaultLevel` | `number \| string`     | No       | Level used when a component omits `level`. Defaults to `1`. Strings must be configured level aliases. |
+| `levels`       | `CounterLevelConfig[]` | No       | Configures selected levels with formats, aliases, styles, and reset rules. Other levels use defaults. |
 
 Config `id` must be a non-empty string and cannot be duplicated. This requirement applies to counter definitions in `counters`; component `id` props are optional and default to `"default"`.
 
@@ -136,15 +139,18 @@ Increments or displays a counter.
 ```md
 <Counter id="section" level="chapter" />
 <Counter id="section" :level="2" />
+<Counter id="section" />
 ```
 
 Props:
 
-| Prop     | Type                                 | Default     | Description                         |
-| -------- | ------------------------------------ | ----------- | ----------------------------------- |
-| `id`     | `string`                             | `"default"` | Counter name.                       |
-| `level`  | `number \| string`                   | None        | Required. Number level or alias.    |
-| `action` | `"step" \| "increment" \| "display"` | `"step"`    | Operation type for this occurrence. |
+| Prop     | Type                                 | Default                | Description                         |
+| -------- | ------------------------------------ | ---------------------- | ----------------------------------- |
+| `id`     | `string`                             | `"default"`            | Counter name.                       |
+| `level`  | `number \| string`                   | Counter `defaultLevel` | Optional number level or alias.     |
+| `action` | `"step" \| "increment" \| "display"` | `"step"`               | Operation type for this occurrence. |
+
+If `level` is omitted, the component uses that counter's `defaultLevel`. The fallback `defaultLevel` is `1`.
 
 If `id` is omitted, the component uses the `default` counter. That counter exists automatically when `counters` is omitted, or when it is declared explicitly as `{ id: "default" }`.
 
@@ -161,7 +167,7 @@ Actions:
 `<CounterInc>` is shorthand for `<Counter action="increment">`:
 
 ```md
-<CounterInc id="theorem" level="theorem" />
+<CounterInc id="theorem" />
 ```
 
 It updates the counter state but renders no text.
@@ -171,7 +177,7 @@ It updates the counter state but renders no text.
 `<CounterDisplay>` is shorthand for `<Counter action="display">`:
 
 ```md
-<CounterDisplay id="theorem" level="theorem" />
+<CounterDisplay id="theorem" />
 ```
 
 It only displays the current value and does not increment.
@@ -402,16 +408,17 @@ Theorem II
 
 ## Level References in Components
 
-The component `level` prop can be a static string, numeric binding, or string binding:
+The optional component `level` prop can be a static string, numeric binding, or string binding:
 
 ```md
+<Counter id="section" />
 <Counter id="section" level="chapter" />
 <Counter id="section" level="2" />
 <Counter id="section" :level="2" />
 <Counter id="section" :level="'section'" />
 ```
 
-`:level` only supports string or number literals. Do not pass runtime variables, because the addon scans slides and builds the complete counter timeline at build time.
+Omit `level` to use the counter's `defaultLevel`. `:level` only supports string or number literals. Do not pass runtime variables, because the addon scans slides and builds the complete counter timeline at build time.
 
 ## Common Patterns
 
@@ -420,7 +427,7 @@ The component `level` prop can be a static string, numeric binding, or string bi
 If there is no config file, or if `counters` is omitted, use the built-in `default` counter by leaving out `id`:
 
 ```md
-# <Counter :level="1" /> Introduction
+# <Counter /> Introduction
 
 ## <Counter :level="2" /> Background
 
@@ -434,6 +441,7 @@ export default defineCounterConfig({
   counters: [
     {
       id: "section",
+      defaultLevel: "section",
       levels: [
         {
           level: 1,
@@ -456,9 +464,9 @@ export default defineCounterConfig({
 ```md
 # <Counter id="section" level="chapter" /> Introduction
 
-## <Counter id="section" :level="2" /> Background
+## <Counter id="section" /> Background
 
-Current section: <CounterDisplay id="section" level="section" />
+Current section: <CounterDisplay id="section" />
 
 ### <Counter id="section" level="subsection" /> Details
 
@@ -472,9 +480,11 @@ export default defineCounterConfig({
   counters: [
     {
       id: "theorem",
+      defaultLevel: "theorem",
       levels: [
         {
           level: 1,
+          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -485,28 +495,30 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" :level="1" /> Compactness
+<Counter id="theorem" /> Compactness
 
-<Counter id="theorem" :level="1" /> Completeness
+<Counter id="theorem" /> Completeness
 ```
 
 ### Increment Now, Display Later
 
 ```md
-<CounterInc id="theorem" :level="1" />
+<CounterInc id="theorem" />
 
-Current theorem number: <CounterDisplay id="theorem" :level="1" />
+Current theorem number: <CounterDisplay id="theorem" />
 
-<Counter id="theorem" :level="1" action="increment" />
+<Counter id="theorem" action="increment" />
 
-Current theorem number: <Counter id="theorem" :level="1" action="display" />
+Current theorem number: <Counter id="theorem" action="display" />
 
-Next theorem: <Counter id="theorem" :level="1" action="step" />
+Next theorem: <Counter id="theorem" action="step" />
 ```
 
 ## Limitations and Notes
 
-`level` is required. Missing `level` causes a build-time error.
+`level` is optional. Missing `level` uses the selected counter's `defaultLevel`, which defaults to `1`.
+
+`defaultLevel` must be a positive integer, numeric string, or configured alias. Relative references such as `@+1` are not valid for `defaultLevel`.
 
 Counter `id` values must be defined in config. The only exception is when there is no config file; then the addon provides `default` automatically.
 

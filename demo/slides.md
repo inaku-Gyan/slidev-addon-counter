@@ -73,44 +73,44 @@ components, and Slidev layouts.
 # <Counter id="demo" :level="1" /> Step, increment, display
 
 ```vue
-<Counter id="theorem" level="theorem" />
+<Counter id="theorem" />
 ```
 
-<Counter id="theorem" level="theorem" />
+<Counter id="theorem" />
 
 ```vue
-<CounterInc id="theorem" level="theorem" />
+<CounterInc id="theorem" />
 ```
 
-<CounterInc id="theorem" level="theorem" /> No text is rendered here.
+<CounterInc id="theorem" /> No text is rendered here.
 
 ```vue
-<CounterDisplay id="theorem" level="theorem" />
+<CounterDisplay id="theorem" />
 ```
 
-<CounterDisplay id="theorem" level="theorem" />
+<CounterDisplay id="theorem" />
 
 ---
 
 # <Counter id="demo" :level="1" /> Independent counters
 
 ```vue
-<Counter id="section" level="section" />
+<Counter id="section" />
 ```
 
-Section: <Counter id="section" level="section" />
+Section: <Counter id="section" />
 
 ```vue
-<Counter id="theorem" level="theorem" />
+<Counter id="theorem" />
 ```
 
-Theorem: <Counter id="theorem" level="theorem" />
+Theorem: <Counter id="theorem" />
 
 ```vue
-<Counter id="section" level="section" />
+<Counter id="section" />
 ```
 
-Section again: <Counter id="section" level="section" />
+Section again: <Counter id="section" />
 
 ---
 
@@ -134,7 +134,7 @@ Section again: <Counter id="section" level="section" />
 
 ```vue
 <span class="text-sky-600 font-bold">
-  <Counter id="section" level="section" />
+  <Counter id="section" />
 </span>
 How does
 <code>HAL_Delay</code>
@@ -142,7 +142,7 @@ work?
 ```
 
 <span class="text-sky-600 font-bold">
-  <Counter id="section" level="section" />
+  <Counter id="section" />
 </span>
 How does
 <code>HAL_Delay</code>
@@ -154,23 +154,23 @@ work?
 
 ````md
 Before:
-<CounterDisplay id="section" level="section" />
+<CounterDisplay id="section" />
 
 ```vue
-<Counter id="section" level="section" />
+<Counter id="section" />
 ```
 
 After:
-<CounterDisplay id="section" level="section" />
+<CounterDisplay id="section" />
 ````
 
-Before: <CounterDisplay id="section" level="section" />
+Before: <CounterDisplay id="section" />
 
 ```vue
-<Counter id="section" level="section" />
+<Counter id="section" />
 ```
 
-After: <CounterDisplay id="section" level="section" />
+After: <CounterDisplay id="section" />
 
 ---
 
@@ -180,9 +180,9 @@ After: <CounterDisplay id="section" level="section" />
 {
   // Register every named counter used by the deck.
   "counters": [
-    { "id": "section", "levels": [...] },
+    { "id": "section", "defaultLevel": "section", "levels": [...] },
     { "id": "demo" },
-    { "id": "theorem", "levels": [...] }
+    { "id": "theorem", "defaultLevel": "theorem", "levels": [...] }
   ]
 }
 ```
@@ -195,6 +195,7 @@ After: <CounterDisplay id="section" level="section" />
 {
   // A two-level counter with Chinese chapter/section labels.
   "id": "section",
+  "defaultLevel": "section",
   "levels": [
     {
       // The alias can be used as <Counter level="chapter" />.
@@ -231,6 +232,7 @@ After: <CounterDisplay id="section" level="section" />
 {
   // A single-level counter with Roman numerals.
   "id": "theorem",
+  "defaultLevel": "theorem",
   "levels": [
     {
       "level": 1,
