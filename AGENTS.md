@@ -13,5 +13,6 @@
 ## Checks
 
 - Before considering work complete, run `pnpm check`.
-- Before publishing, verify `package.json` `files` includes every public doc linked from README, then run `pnpm check` and inspect `pnpm pack --dry-run`.
+- Releases must follow `docs/release.md`; do not publish from a local machine unless that process is intentionally changed.
+- Before release, verify `package.json` `files` includes every public doc linked from README. The release process must run `pnpm check` and `pnpm pack --dry-run`.
 - Treat build warnings as something to report, even when the command exits successfully.
