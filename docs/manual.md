@@ -4,6 +4,11 @@ English | [中文](./manual.zh-CN.md)
 
 `slidev-addon-counter` provides LaTeX-like multi-level counters for Slidev. Use it to generate stable chapter, section, theorem, example, or other reusable numbers in Markdown, Vue components, and Slidev layouts.
 
+## Requirements
+
+- Node.js >= 22.18.0
+- Slidev >= 52.0.0
+
 ## Install and Enable
 
 Install the addon:

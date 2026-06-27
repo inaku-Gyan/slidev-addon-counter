@@ -6,6 +6,11 @@ Multi-level counters for Slidev, useful for chapter, section, theorem, and other
 
 [Live demo](https://inaku-Gyan.github.io/slidev-addon-counter/)
 
+## Requirements
+
+- Node.js >= 22.18.0
+- Slidev >= 52.0.0
+
 ## Install
 
 ```bash
