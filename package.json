@@ -52,7 +52,11 @@
     "lint:fix": "oxlint --fix",
     "fmt": "prettier --write .",
     "fmt:check": "prettier --check .",
-    "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test && pnpm build"
+    "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test && pnpm build",
+    "skills:add": "skills add",
+    "skills:install": "skills experimental_install",
+    "skills:list": "skills list",
+    "skills:update": "skills update -p -y"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
@@ -70,6 +74,7 @@
     "oxlint": "^1.71.0",
     "prettier": "^3.8.4",
     "prettier-plugin-slidev": "^1.0.5",
+    "skills": "^1.5.13",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9",
     "vue": "^3.5.38",
