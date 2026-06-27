@@ -26,7 +26,7 @@ addons:
 
 ## 快速示例
 
-### 无配置文件
+### 默认 counter
 
 没有配置文件时，组件会使用内置的 `default` counter：
 
@@ -38,7 +38,7 @@ addons:
 当前小节：<CounterDisplay :level="2" />
 ```
 
-### Level alias
+### 配置 counter
 
 在幻灯片入口文件同目录创建 `slidev-addon-counter.config.ts`：
 
@@ -59,17 +59,13 @@ export default defineCounterConfig({
           level: 2,
           alias: "section",
         },
-        {
-          level: 3,
-          alias: "subsection",
-        },
       ],
     },
   ],
 });
 ```
 
-在 slides 中可以使用 alias、数字 level，也可以使用已配置的默认 level：
+在 slides 中可以使用 alias 和已配置的默认 level：
 
 ```md
 # <Counter id="section" level="chapter" /> 绪论
@@ -77,56 +73,13 @@ export default defineCounterConfig({
 ## <Counter id="section" /> 背景
 
 当前小节：<CounterDisplay id="section" />
-
-### <Counter id="section" level="subsection" /> 细节
-
-### <Counter id="section" :level="3" /> 更多细节
 ```
 
-### 罗马数字定理
+## 更多示例
 
-用罗马数字和自定义格式配置 theorem counter：
+[在线示例](https://inaku-Gyan.github.io/slidev-addon-counter/) 中提供了更完整的示例，并把配置、slides 源码和渲染效果放在一起对照展示。
 
-```ts
-export default defineCounterConfig({
-  counters: [
-    {
-      id: "theorem",
-      defaultLevel: "theorem",
-      levels: [
-        {
-          level: 1,
-          alias: "theorem",
-          style: "upper-roman",
-          format: "Theorem %{:value}",
-        },
-      ],
-    },
-  ],
-});
-```
-
-```md
-<Counter id="theorem" /> Compactness
-
-<Counter id="theorem" /> Completeness
-```
-
-### Action 用法
-
-可以使用简写组件，也可以给 `<Counter>` 传 `action`：
-
-```md
-<CounterInc id="theorem" />
-当前定理：<CounterDisplay id="theorem" />
-
-<Counter id="theorem" action="increment" />
-当前定理：<Counter id="theorem" action="display" />
-
-下一个定理：<Counter id="theorem" action="step" />
-```
-
-`<Counter>` 默认会递增并显示编号；`<CounterInc>` 只递增不显示；`<CounterDisplay>` 只显示当前编号。
+也可以直接阅读完整 demo 源码：[`demo/`](../demo/)。
 
 ## 用户手册
 

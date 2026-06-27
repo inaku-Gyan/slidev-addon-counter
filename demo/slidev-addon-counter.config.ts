@@ -2,6 +2,34 @@ import { defineCounterConfig } from "../config";
 
 export default defineCounterConfig({
   counters: [
+    // Demo-only counters used to structure this teaching deck.
+    {
+      id: "demoSection",
+      defaultLevel: "section",
+      levels: [
+        {
+          level: 1,
+          alias: "section",
+          format: "%{:value}",
+        },
+      ],
+    },
+    {
+      id: "demoExample",
+      defaultLevel: "example",
+      levels: [
+        {
+          level: 1,
+          alias: "example",
+          format: "Example %{:value}",
+        },
+      ],
+    },
+
+    // User-facing counters used by the examples below.
+    {
+      id: "default",
+    },
     {
       id: "section",
       defaultLevel: "section",
@@ -9,19 +37,19 @@ export default defineCounterConfig({
         {
           level: 1,
           alias: "chapter",
-          style: "decimal",
-          format: "第 %{:value} 章",
+          format: "Chapter %{:value}",
         },
         {
           level: 2,
           alias: "section",
-          style: "decimal",
-          format: "%{@-1:full}第 %{:value} 节",
+          format: "%{@-1:full}.%{:value}",
+        },
+        {
+          level: 3,
+          alias: "subsection",
+          format: "%{@-1:full}.%{:value}",
         },
       ],
-    },
-    {
-      id: "demo",
     },
     {
       id: "theorem",
@@ -32,6 +60,52 @@ export default defineCounterConfig({
           alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
+        },
+      ],
+    },
+    {
+      id: "claim",
+      defaultLevel: "claim",
+      levels: [
+        {
+          level: 1,
+          alias: "claim",
+          format: "Claim %{:value}",
+        },
+      ],
+    },
+    {
+      id: "taskFlow",
+      defaultLevel: "task",
+      levels: [
+        {
+          level: 1,
+          alias: "phase",
+          format: "Phase %{:value}",
+          reset: "none",
+        },
+        {
+          level: 2,
+          alias: "task",
+          format: "%{@-1:full} / Task %{:value}",
+        },
+      ],
+    },
+    {
+      id: "cnSection",
+      defaultLevel: "section",
+      levels: [
+        {
+          level: 1,
+          alias: "chapter",
+          style: "cjk",
+          format: "第%{:value}章",
+        },
+        {
+          level: 2,
+          alias: "section",
+          style: "cjk",
+          format: "%{@-1:full}第%{:value}节",
         },
       ],
     },

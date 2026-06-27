@@ -26,7 +26,7 @@ addons:
 
 ## Quick Examples
 
-### No Config
+### Default Counter
 
 Without a config file, components use the built-in `default` counter:
 
@@ -38,7 +38,7 @@ Without a config file, components use the built-in `default` counter:
 Current section: <CounterDisplay :level="2" />
 ```
 
-### Level Aliases
+### Configured Counter
 
 Create `slidev-addon-counter.config.ts` next to your Slidev entry file:
 
@@ -59,17 +59,13 @@ export default defineCounterConfig({
           level: 2,
           alias: "section",
         },
-        {
-          level: 3,
-          alias: "subsection",
-        },
       ],
     },
   ],
 });
 ```
 
-Use aliases, numeric levels, or the configured default level in slides:
+Use the configured aliases and default level in slides:
 
 ```md
 # <Counter id="section" level="chapter" /> Introduction
@@ -77,56 +73,13 @@ Use aliases, numeric levels, or the configured default level in slides:
 ## <Counter id="section" /> Background
 
 Current section: <CounterDisplay id="section" />
-
-### <Counter id="section" level="subsection" /> Details
-
-### <Counter id="section" :level="3" /> More Details
 ```
 
-### Roman Theorems
+## More Examples
 
-Configure a theorem counter with Roman numerals and a custom format.
+The [live demo](https://inaku-Gyan.github.io/slidev-addon-counter/) shows richer examples with the config, slide source, and rendered output side by side.
 
-```ts
-export default defineCounterConfig({
-  counters: [
-    {
-      id: "theorem",
-      defaultLevel: "theorem",
-      levels: [
-        {
-          level: 1,
-          alias: "theorem",
-          style: "upper-roman",
-          format: "Theorem %{:value}",
-        },
-      ],
-    },
-  ],
-});
-```
-
-```md
-<Counter id="theorem" /> Compactness
-
-<Counter id="theorem" /> Completeness
-```
-
-### Actions
-
-Use shorthand components or pass `action` to `<Counter>`:
-
-```md
-<CounterInc id="theorem" />
-Current theorem: <CounterDisplay id="theorem" />
-
-<Counter id="theorem" action="increment" />
-Current theorem: <Counter id="theorem" action="display" />
-
-Next theorem: <Counter id="theorem" action="step" />
-```
-
-`<Counter>` increments and displays by default. `<CounterInc>` increments without rendering text. `<CounterDisplay>` displays the current value without incrementing.
+You can also read the complete demo source in [`demo/`](./demo/).
 
 ## Manual
 

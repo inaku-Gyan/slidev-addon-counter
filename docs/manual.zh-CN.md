@@ -4,6 +4,8 @@
 
 `slidev-addon-counter` 为 Slidev 提供类似 LaTeX 的多级计数器。它可以在 Markdown、Vue 组件和 Slidev 布局中生成稳定的章节、小节、定理、例题等编号。
 
+需要查看渲染后的完整 walkthrough，可以访问[在线示例](https://inaku-Gyan.github.io/slidev-addon-counter/)，或直接阅读完整 demo 源码：[`demo/`](../demo/)。
+
 ## 环境要求
 
 - Node.js >= 22.18.0
