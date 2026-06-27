@@ -1,7 +1,7 @@
 {
   "name": "slidev-addon-counter",
   "version": "0.1.2",
-  "description": "LaTeX-like multi-level counters for Slidev.",
+  "description": "Multi-level counters for Slidev.",
   "type": "module",
   "private": false,
   "license": "MIT",
