@@ -119,7 +119,7 @@ export function defineCounterConfig<T extends CounterConfig>(config: T): T {
 export function normalizeCounterConfig(
   config: CounterConfig | undefined,
 ): NormalizedCounterConfig {
-  const inputCounters = config?.counters ?? [{ id: "default" }];
+  const inputCounters = config?.counters ?? [];
   const counters = new Map<string, NormalizedCounterDefinition>();
 
   for (const [counterIndex, definition] of inputCounters.entries()) {
@@ -191,7 +191,7 @@ export function normalizeCounterConfig(
     });
   }
 
-  if (counters.size === 0) {
+  if (!counters.has("default")) {
     counters.set("default", {
       id: "default",
       defaultLevel: 1,

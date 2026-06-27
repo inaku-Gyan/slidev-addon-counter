@@ -28,9 +28,6 @@ export default defineCounterConfig({
 
     // User-facing counters used by the examples below.
     {
-      id: "default",
-    },
-    {
       id: "section",
       defaultLevel: "section",
       levels: [

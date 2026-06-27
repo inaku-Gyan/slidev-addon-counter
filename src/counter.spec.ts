@@ -32,6 +32,37 @@ describe("normalizeCounterConfig", () => {
     expect(counter.levels.size).toBe(0);
   });
 
+  it("adds a default counter alongside configured counters", () => {
+    const config = normalizeCounterConfig({
+      counters: [{ id: "section" }],
+    });
+    const counter = getCounterDefinition(config, "default");
+
+    expect(counter.id).toBe("default");
+    expect(counter.defaultLevel).toBe(1);
+    expect(counter.levels.size).toBe(0);
+    expect(getCounterDefinition(config, "section").id).toBe("section");
+  });
+
+  it("lets explicit default counter config override the built-in default", () => {
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "default",
+          defaultLevel: "section",
+          levels: [
+            { level: 1, alias: "chapter" },
+            { level: 2, alias: "section" },
+          ],
+        },
+      ],
+    });
+    const counter = getCounterDefinition(config, "default");
+
+    expect(counter.defaultLevel).toBe(2);
+    expect(counter.aliases.get("section")).toBe(2);
+  });
+
   it("sorts references through explicit levels and aliases", () => {
     const config = normalizeCounterConfig({
       counters: [
@@ -435,6 +466,26 @@ describe("buildCounterTimeline", () => {
     expect(timeline.snapshots.a.display).toBe("0.1");
     expect(timeline.snapshots.b.level).toBe(1);
     expect(timeline.snapshots.b.display).toBe("Theorem I");
+  });
+
+  it("uses the built-in default counter with custom config", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "default",
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+      ],
+      {
+        counters: [{ id: "section" }],
+      },
+    );
+
+    expect(timeline.snapshots.a.level).toBe(1);
+    expect(timeline.snapshots.a.display).toBe("1");
   });
 
   it("lets explicit operation levels override configured default levels", () => {
