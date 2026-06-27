@@ -410,6 +410,18 @@ Theorem II
 
 ## 常见模式
 
+### 无配置文件的 default counter
+
+没有配置文件，或省略 `counters` 时，可以省略 `id`，直接使用内置的 `default` counter：
+
+```md
+# <Counter :level="1" /> 绪论
+
+## <Counter :level="2" /> 背景
+
+当前小节：<CounterDisplay :level="2" />
+```
+
 ### 章节和小节
 
 ```ts
@@ -428,6 +440,11 @@ export default defineCounterConfig({
           alias: "section",
           format: "%{@-1:full}第 %{:value} 节",
         },
+        {
+          level: 3,
+          alias: "subsection",
+          format: "%{@-1:full}第 %{:value} 小节",
+        },
       ],
     },
   ],
@@ -437,7 +454,13 @@ export default defineCounterConfig({
 ```md
 # <Counter id="section" level="chapter" /> 绪论
 
-## <Counter id="section" level="section" /> 背景
+## <Counter id="section" :level="2" /> 背景
+
+当前小节：<CounterDisplay id="section" level="section" />
+
+### <Counter id="section" level="subsection" /> 细节
+
+### <Counter id="section" :level="3" /> 更多细节
 ```
 
 ### 定理编号
@@ -450,7 +473,6 @@ export default defineCounterConfig({
       levels: [
         {
           level: 1,
-          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -461,15 +483,23 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" level="theorem" />
+<Counter id="theorem" :level="1" /> Compactness
+
+<Counter id="theorem" :level="1" /> Completeness
 ```
 
 ### 只递增，再稍后显示
 
 ```md
-<CounterInc id="theorem" level="theorem" />
+<CounterInc id="theorem" :level="1" />
 
-当前定理编号：<CounterDisplay id="theorem" level="theorem" />
+当前定理编号：<CounterDisplay id="theorem" :level="1" />
+
+<Counter id="theorem" :level="1" action="increment" />
+
+当前定理编号：<Counter id="theorem" :level="1" action="display" />
+
+下一个定理：<Counter id="theorem" :level="1" action="step" />
 ```
 
 ## 限制和注意事项

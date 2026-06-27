@@ -12,14 +12,26 @@ pnpm add -D slidev-addon-counter
 
 在 Slidev deck 的 frontmatter 中启用插件：
 
-```md
----
+```yml
 addons:
   - slidev-addon-counter
----
 ```
 
 ## 快速示例
+
+### 无配置文件
+
+没有配置文件时，组件会使用内置的 `default` counter：
+
+```md
+# <Counter :level="1" /> 绪论
+
+## <Counter :level="2" /> 背景
+
+当前小节：<CounterDisplay :level="2" />
+```
+
+### Level alias
 
 在幻灯片入口文件同目录创建 `slidev-addon-counter.config.ts`：
 
@@ -41,20 +53,70 @@ export default defineCounterConfig({
           alias: "section",
           format: "%{@-1:full}第 %{:value} 节",
         },
+        {
+          level: 3,
+          alias: "subsection",
+          format: "%{@-1:full}第 %{:value} 小节",
+        },
       ],
     },
   ],
 });
 ```
 
-在 slides 中使用：
+在 slides 中可以使用 alias，也可以使用数字 level：
 
 ```md
 # <Counter id="section" level="chapter" /> 绪论
 
-## <Counter id="section" level="section" /> 背景
+## <Counter id="section" :level="2" /> 背景
 
 当前小节：<CounterDisplay id="section" level="section" />
+
+### <Counter id="section" level="subsection" /> 细节
+
+### <Counter id="section" :level="3" /> 更多细节
+```
+
+### 罗马数字定理
+
+用罗马数字和自定义格式配置 theorem counter：
+
+```ts
+export default defineCounterConfig({
+  counters: [
+    {
+      id: "theorem",
+      levels: [
+        {
+          level: 1,
+          style: "upper-roman",
+          format: "Theorem %{:value}",
+        },
+      ],
+    },
+  ],
+});
+```
+
+```md
+<Counter id="theorem" :level="1" /> Compactness
+
+<Counter id="theorem" :level="1" /> Completeness
+```
+
+### Action 用法
+
+可以使用简写组件，也可以给 `<Counter>` 传 `action`：
+
+```md
+<CounterInc id="theorem" :level="1" />
+当前定理：<CounterDisplay id="theorem" :level="1" />
+
+<Counter id="theorem" :level="1" action="increment" />
+当前定理：<Counter id="theorem" :level="1" action="display" />
+
+下一个定理：<Counter id="theorem" :level="1" action="step" />
 ```
 
 `<Counter>` 默认会递增并显示编号；`<CounterInc>` 只递增不显示；`<CounterDisplay>` 只显示当前编号。

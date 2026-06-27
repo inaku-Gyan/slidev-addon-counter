@@ -410,6 +410,18 @@ The component `level` prop can be a static string, numeric binding, or string bi
 
 ## Common Patterns
 
+### Default Counter Without Config
+
+If there is no config file, or if `counters` is omitted, use the built-in `default` counter by leaving out `id`:
+
+```md
+# <Counter :level="1" /> Introduction
+
+## <Counter :level="2" /> Background
+
+Current section: <CounterDisplay :level="2" />
+```
+
 ### Chapters and Sections
 
 ```ts
@@ -428,6 +440,11 @@ export default defineCounterConfig({
           alias: "section",
           format: "%{@-1:full}.%{:value}",
         },
+        {
+          level: 3,
+          alias: "subsection",
+          format: "%{@-1:full}.%{:value}",
+        },
       ],
     },
   ],
@@ -437,7 +454,13 @@ export default defineCounterConfig({
 ```md
 # <Counter id="section" level="chapter" /> Introduction
 
-## <Counter id="section" level="section" /> Background
+## <Counter id="section" :level="2" /> Background
+
+Current section: <CounterDisplay id="section" level="section" />
+
+### <Counter id="section" level="subsection" /> Details
+
+### <Counter id="section" :level="3" /> More Details
 ```
 
 ### Theorem Numbers
@@ -450,7 +473,6 @@ export default defineCounterConfig({
       levels: [
         {
           level: 1,
-          alias: "theorem",
           style: "upper-roman",
           format: "Theorem %{:value}",
         },
@@ -461,15 +483,23 @@ export default defineCounterConfig({
 ```
 
 ```md
-<Counter id="theorem" level="theorem" />
+<Counter id="theorem" :level="1" /> Compactness
+
+<Counter id="theorem" :level="1" /> Completeness
 ```
 
 ### Increment Now, Display Later
 
 ```md
-<CounterInc id="theorem" level="theorem" />
+<CounterInc id="theorem" :level="1" />
 
-Current theorem number: <CounterDisplay id="theorem" level="theorem" />
+Current theorem number: <CounterDisplay id="theorem" :level="1" />
+
+<Counter id="theorem" :level="1" action="increment" />
+
+Current theorem number: <Counter id="theorem" :level="1" action="display" />
+
+Next theorem: <Counter id="theorem" :level="1" action="step" />
 ```
 
 ## Limitations and Notes
