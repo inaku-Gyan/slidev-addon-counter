@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   id?: string;
-  level: number | string;
+  level?: number | string;
   op?: string;
 }>();
 </script>

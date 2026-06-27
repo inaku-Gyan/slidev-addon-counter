@@ -7,7 +7,7 @@ const props = withDefaults(
   defineProps<{
     action?: "step" | "increment" | "display";
     id?: string;
-    level: number | string;
+    level?: number | string;
     op?: string;
   }>(),
   {

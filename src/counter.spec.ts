@@ -28,6 +28,7 @@ describe("normalizeCounterConfig", () => {
     const counter = getCounterDefinition(config, "default");
 
     expect(counter.id).toBe("default");
+    expect(counter.defaultLevel).toBe(1);
     expect(counter.levels.size).toBe(0);
   });
 
@@ -47,6 +48,48 @@ describe("normalizeCounterConfig", () => {
 
     expect(counter.aliases.get("chapter")).toBe(1);
     expect(counter.aliases.get("section")).toBe(2);
+  });
+
+  it("normalizes numeric and alias default levels", () => {
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "section",
+          defaultLevel: "section",
+          levels: [
+            { level: 1, alias: "chapter" },
+            { level: 2, alias: "section" },
+          ],
+        },
+        {
+          id: "appendix",
+          defaultLevel: 2,
+        },
+      ],
+    });
+
+    expect(getCounterDefinition(config, "section").defaultLevel).toBe(2);
+    expect(getCounterDefinition(config, "appendix").defaultLevel).toBe(2);
+  });
+
+  it("rejects invalid default levels", () => {
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [{ id: "section", defaultLevel: 0 }],
+      }),
+    ).toThrow("positive integer");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [{ id: "section", defaultLevel: "@+1" }],
+      }),
+    ).toThrow("relative level reference");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [{ id: "section", defaultLevel: "missing" }],
+      }),
+    ).toThrow('unknown level alias "missing"');
   });
 
   it("rejects duplicate aliases and levels", () => {
@@ -332,6 +375,88 @@ describe("buildCounterTimeline", () => {
     expect(timeline.snapshots.a.display).toBe("1");
     expect(timeline.snapshots.b.display).toBe("1");
   });
+
+  it("uses level 1 when operation level and config default level are omitted", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "default",
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+      ],
+      undefined,
+    );
+
+    expect(timeline.snapshots.a.level).toBe(1);
+    expect(timeline.snapshots.a.display).toBe("1");
+  });
+
+  it("uses configured default levels when operation level is omitted", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "section",
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+        {
+          id: "b",
+          counter: "theorem",
+          action: "step",
+          slideNo: 1,
+          order: 1,
+        },
+      ],
+      {
+        counters: [
+          { id: "section", defaultLevel: 2 },
+          {
+            id: "theorem",
+            defaultLevel: "theorem",
+            levels: [
+              {
+                level: 1,
+                alias: "theorem",
+                style: "upper-roman",
+                format: "Theorem %{:value}",
+              },
+            ],
+          },
+        ],
+      },
+    );
+
+    expect(timeline.snapshots.a.level).toBe(2);
+    expect(timeline.snapshots.a.display).toBe("0.1");
+    expect(timeline.snapshots.b.level).toBe(1);
+    expect(timeline.snapshots.b.display).toBe("Theorem I");
+  });
+
+  it("lets explicit operation levels override configured default levels", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "a",
+          counter: "section",
+          level: 1,
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+      ],
+      {
+        counters: [{ id: "section", defaultLevel: 2 }],
+      },
+    );
+
+    expect(timeline.snapshots.a.level).toBe(1);
+    expect(timeline.snapshots.a.display).toBe("1");
+  });
 });
 
 describe("counter component scanner", () => {
@@ -380,5 +505,23 @@ describe("counter component scanner", () => {
       { index: 193, value: ' op="counter-s3-o2"' },
       { index: 236, value: ' op="counter-s3-o3"' },
     ]);
+  });
+
+  it("allows counter components to omit level", () => {
+    const operations = extractCounterOperations(
+      [
+        '<Counter id="section" />',
+        '<CounterInc id="section" />',
+        '<CounterDisplay id="section" />',
+      ].join("\n"),
+      1,
+    );
+
+    expect(operations).toMatchObject([
+      { counter: "section", action: "step" },
+      { counter: "section", action: "increment" },
+      { counter: "section", action: "display" },
+    ]);
+    expect(operations.every((operation) => operation.level == null)).toBe(true);
   });
 });

@@ -24,6 +24,7 @@ export interface CounterLevelConfig {
 
 export interface CounterDefinition {
   id: string;
+  defaultLevel?: LevelRef;
   levels?: CounterLevelConfig[];
 }
 
@@ -41,6 +42,7 @@ export interface NormalizedCounterLevel {
 
 export interface NormalizedCounterDefinition {
   id: string;
+  defaultLevel: number;
   levels: Map<number, NormalizedCounterLevel>;
   aliases: Map<string, number>;
 }
@@ -52,7 +54,7 @@ export interface NormalizedCounterConfig {
 export interface CounterOperation {
   id: string;
   counter: string;
-  level: LevelRef;
+  level?: LevelRef;
   action: CounterAction;
   slideNo: number;
   order: number;
@@ -177,12 +179,22 @@ export function normalizeCounterConfig(
       });
     }
 
-    counters.set(id, { id, levels, aliases });
+    counters.set(id, {
+      id,
+      defaultLevel: resolveDefaultLevel(
+        definition.defaultLevel,
+        aliases,
+        `${counterPath}.defaultLevel`,
+      ),
+      levels,
+      aliases,
+    });
   }
 
   if (counters.size === 0) {
     counters.set("default", {
       id: "default",
+      defaultLevel: 1,
       levels: new Map(),
       aliases: new Map(),
     });
@@ -314,7 +326,10 @@ export function buildCounterTimeline(
 
   for (const operation of sorted) {
     const counter = getCounterDefinition(normalized, operation.counter);
-    const level = resolveLevelRef(counter, operation.level, 1);
+    const level =
+      operation.level == null
+        ? counter.defaultLevel
+        : resolveLevelRef(counter, operation.level, 1);
     const counts = states.get(operation.counter) ?? [];
 
     if (operation.action === "step" || operation.action === "increment") {
@@ -369,12 +384,6 @@ export function extractCounterOperations(
     const counter = readStringAttribute(attrs, "id") ?? "default";
     const level = readLevelAttribute(attrs);
     const action = getAction(component, readStringAttribute(attrs, "action"));
-
-    if (level == null) {
-      throw new Error(
-        `<${component}> on slide ${slideNo} is missing required prop "level".`,
-      );
-    }
 
     operations.push({
       id,
@@ -597,6 +606,38 @@ function validateAlias(alias: string, path: string): void {
   if (/^\d+$/.test(alias) || alias.startsWith("@") || alias.includes(":")) {
     throw new Error(`${path} "${alias}" is reserved.`);
   }
+}
+
+function resolveDefaultLevel(
+  ref: LevelRef | undefined,
+  aliases: Map<string, number>,
+  path: string,
+): number {
+  if (ref == null) {
+    return 1;
+  }
+
+  if (typeof ref === "number") {
+    validateLevel(ref, path);
+    return ref;
+  }
+
+  if (/^\d+$/.test(ref)) {
+    const level = Number(ref);
+    validateLevel(level, path);
+    return level;
+  }
+
+  if (ref.startsWith("@")) {
+    throw new Error(`${path} cannot be a relative level reference.`);
+  }
+
+  const aliasLevel = aliases.get(ref);
+  if (aliasLevel != null) {
+    return aliasLevel;
+  }
+
+  throw new Error(`${path} references unknown level alias "${ref}".`);
 }
 
 function parsePlaceholder(
