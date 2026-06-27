@@ -73,18 +73,18 @@ export default defineCounterConfig({
 });
 ```
 
-如果没有配置文件，插件会创建一个名为 `default` 的默认 counter。默认 counter 支持任意层级：
+插件始终会创建一个名为 `default` 的默认 counter，除非你显式配置了同名 counter。默认 counter 支持任意层级：
 
 ```md
 <Counter />
 <Counter :level="2" />
 ```
 
-如果定义了自定义 counters，并且还使用省略 `id` 的组件，需要显式声明 `default`：
+只有需要覆盖默认配置时，才需要显式声明 `default`：
 
 ```ts
 export default defineCounterConfig({
-  counters: [{ id: "default" }],
+  counters: [{ id: "default", defaultLevel: 2 }],
 });
 ```
 
@@ -104,7 +104,7 @@ export default defineCounterConfig({
 });
 ```
 
-`counters` 可选。不提供时等价于 `{ counters: [{ id: "default" }] }`。
+`counters` 可选。只要 `counters` 中没有 `id: "default"`，插件都会自动添加内置的 `{ id: "default" }` counter。
 
 每个已配置的 counter 定义：
 
@@ -424,9 +424,9 @@ Theorem II
 
 ## 常见模式
 
-### 无配置文件的 default counter
+### 默认 counter
 
-没有配置文件，或省略 `counters` 时，可以省略 `id`，直接使用内置的 `default` counter：
+可以省略 `id`，直接使用内置的 `default` counter。无论是否配置了自定义 counters，它都会存在：
 
 ```md
 # <Counter /> 绪论
@@ -522,7 +522,7 @@ export default defineCounterConfig({
 
 `defaultLevel` 必须是正整数、数字字符串或已配置的 alias。`@+1` 这类相对引用不能用于 `defaultLevel`。
 
-counter `id` 必须已经在配置中定义。唯一例外是完全没有配置文件时，插件会自动提供 `default`。
+counter `id` 必须已经在配置中定义。唯一例外是 `default`，插件会自动提供它，除非你显式定义了同名 counter。
 
 同一个 counter 内不能重复定义 level，也不能重复定义 alias。
 

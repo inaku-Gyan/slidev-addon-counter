@@ -28,7 +28,7 @@ addons:
 
 ### 默认 counter
 
-没有配置文件时，组件会使用内置的 `default` counter：
+省略 `id` 的组件会使用内置的 `default` counter。即使配置了其他 counters，插件也会自动提供它：
 
 ```md
 # <Counter /> 绪论

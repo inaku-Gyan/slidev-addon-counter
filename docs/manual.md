@@ -73,18 +73,18 @@ export default defineCounterConfig({
 });
 ```
 
-If there is no config file, the addon creates a `default` counter. The default counter supports any level:
+The addon always creates a `default` counter unless you configure one explicitly. The default counter supports any level:
 
 ```md
 <Counter />
 <Counter :level="2" />
 ```
 
-If you define custom counters and still use components without `id`, declare `default` explicitly:
+Declare `default` explicitly only when you want to override its configuration:
 
 ```ts
 export default defineCounterConfig({
-  counters: [{ id: "default" }],
+  counters: [{ id: "default", defaultLevel: 2 }],
 });
 ```
 
@@ -104,7 +104,7 @@ export default defineCounterConfig({
 });
 ```
 
-`counters` is optional. If omitted, it behaves like `{ counters: [{ id: "default" }] }`.
+`counters` is optional. The addon always adds a built-in `{ id: "default" }` counter unless `counters` already includes `id: "default"`.
 
 Each configured counter definition:
 
@@ -424,9 +424,9 @@ Omit `level` to use the counter's `defaultLevel`. `:level` only supports string 
 
 ## Common Patterns
 
-### Default Counter Without Config
+### Default Counter
 
-If there is no config file, or if `counters` is omitted, use the built-in `default` counter by leaving out `id`:
+Use the built-in `default` counter by leaving out `id`. It is available with or without custom counters:
 
 ```md
 # <Counter /> Introduction
@@ -522,7 +522,7 @@ Next theorem: <Counter id="theorem" action="step" />
 
 `defaultLevel` must be a positive integer, numeric string, or configured alias. Relative references such as `@+1` are not valid for `defaultLevel`.
 
-Counter `id` values must be defined in config. The only exception is when there is no config file; then the addon provides `default` automatically.
+Counter `id` values must be defined in config, except for `default`, which the addon provides automatically unless you define it explicitly.
 
 Levels and aliases cannot be duplicated within the same counter.
 

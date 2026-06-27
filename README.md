@@ -28,7 +28,7 @@ addons:
 
 ### Default Counter
 
-Without a config file, components use the built-in `default` counter:
+Components without `id` use the built-in `default` counter. The addon provides it automatically, even when you configure other counters:
 
 ```md
 # <Counter /> Introduction

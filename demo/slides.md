@@ -55,42 +55,6 @@ need custom counters.
 
 ---
 
-# <Counter id="demoSection" /> Counter map for this deck
-
-<div class="two-col">
-  <div class="example-panel">
-
-**Demo-only counters**
-
-These structure the teaching deck itself.
-
-```ts
-const demoCounters = [{ id: "demoSection" }, { id: "demoExample" }];
-```
-
-  </div>
-  <div class="example-panel">
-
-**Teaching counters**
-
-These are shown to users as addon examples.
-
-```ts
-const teachingCounters = [
-  { id: "default" },
-  { id: "section" },
-  { id: "theorem" },
-  { id: "claim" },
-  { id: "taskFlow" },
-  { id: "cnSection" },
-];
-```
-
-  </div>
-</div>
-
----
-
 # <Counter id="demoExample" /> Default counter with no `id`
 
 <div class="example-grid">
@@ -99,9 +63,8 @@ const teachingCounters = [
 **Config**
 
 ```ts
-// Automatic when no config file exists.
-// Explicit here because this deck has custom counters.
-const counters = [{ id: "default" }];
+// Automatic, even when the config defines other counters.
+const counters = [];
 ```
 
   </div>
