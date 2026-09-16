@@ -19,10 +19,7 @@ export interface SnapshotSlide {
 }
 
 export type SnapshotUpdateKind =
-  | "initial"
-  | "unchanged"
-  | "incremental"
-  | "full";
+  "initial" | "unchanged" | "incremental" | "full";
 
 export interface SnapshotModule {
   code: string;
