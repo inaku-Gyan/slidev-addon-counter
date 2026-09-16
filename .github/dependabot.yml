@@ -7,6 +7,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Shanghai
+    labels:
+      - chore
     open-pull-requests-limit: 10
     groups:
       npm-minor-patch:
@@ -21,6 +23,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Shanghai
+    labels:
+      - chore
     open-pull-requests-limit: 10
     groups:
       github-actions-minor-patch:
