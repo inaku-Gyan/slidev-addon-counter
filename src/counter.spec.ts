@@ -5,6 +5,7 @@ import {
   extractCounterOperations,
   formatCounterValue,
   getCounterDefinition,
+  getLevelConfig,
   injectCounterOperationIds,
   normalizeCounterConfig,
   renderCounterFormat,
@@ -14,12 +15,28 @@ import { buildCounterTimelineState } from "./counter-timeline";
 describe("formatCounterValue", () => {
   it("formats built-in styles", () => {
     expect(formatCounterValue(3)).toBe("3");
-    expect(formatCounterValue(3, "zero")).toBe("03");
+    expect(formatCounterValue(3, "decimal-leading-zero")).toBe("03");
     expect(formatCounterValue(27, "lower-alpha")).toBe("aa");
     expect(formatCounterValue(27, "upper-alpha")).toBe("AA");
+    expect(formatCounterValue(10, "lower-hex")).toBe("a");
+    expect(formatCounterValue(15, "upper-hex")).toBe("F");
+    expect(formatCounterValue(16, "lower-hex")).toBe("10");
+    expect(formatCounterValue(0, "upper-hex")).toBe("0");
     expect(formatCounterValue(14, "lower-roman")).toBe("xiv");
     expect(formatCounterValue(14, "upper-roman")).toBe("XIV");
     expect(formatCounterValue(12, "cjk")).toBe("十二");
+  });
+
+  it("rejects invalid hexadecimal values", () => {
+    expect(() => formatCounterValue(-1, "lower-hex")).toThrow(
+      "non-negative safe integer",
+    );
+    expect(() => formatCounterValue(1.5, "lower-hex")).toThrow(
+      "non-negative safe integer",
+    );
+    expect(() =>
+      formatCounterValue(Number.MAX_SAFE_INTEGER + 1, "lower-hex"),
+    ).toThrow("non-negative safe integer");
   });
 });
 
@@ -102,6 +119,41 @@ describe("normalizeCounterConfig", () => {
 
     expect(getCounterDefinition(config, "section").defaultLevel).toBe(2);
     expect(getCounterDefinition(config, "appendix").defaultLevel).toBe(2);
+  });
+
+  it("normalizes per-level starts and defaults unconfigured levels to one", () => {
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "section",
+          levels: [
+            { level: 1, start: 0 },
+            { level: 2, start: 10 },
+          ],
+        },
+      ],
+    });
+    const counter = getCounterDefinition(config, "section");
+
+    expect(getLevelConfig(counter, 1).start).toBe(0);
+    expect(getLevelConfig(counter, 2).start).toBe(10);
+    expect(getLevelConfig(counter, 3).start).toBe(1);
+  });
+
+  it("rejects invalid level starts", () => {
+    for (const start of [
+      -1,
+      1.5,
+      Number.POSITIVE_INFINITY,
+      Number.NaN,
+      Number.MAX_SAFE_INTEGER + 1,
+    ]) {
+      expect(() =>
+        normalizeCounterConfig({
+          counters: [{ id: "section", levels: [{ level: 1, start }] }],
+        }),
+      ).toThrow("non-negative safe integer");
+    }
   });
 
   it("rejects invalid default levels", () => {
@@ -200,6 +252,17 @@ describe("normalizeCounterConfig", () => {
         counters: [
           {
             id: "section",
+            levels: [{ level: 1, style: "zero" as never }],
+          },
+        ],
+      }),
+    ).toThrow("style");
+
+    expect(() =>
+      normalizeCounterConfig({
+        counters: [
+          {
+            id: "section",
             levels: [{ level: 1, reset: "parent" as never }],
           },
         ],
@@ -209,6 +272,29 @@ describe("normalizeCounterConfig", () => {
 });
 
 describe("renderCounterFormat", () => {
+  it("uses configured starts for values and raw refs before incrementing", () => {
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "section",
+          levels: [
+            { level: 1, start: 5, format: "%{:value}:%{:raw}" },
+            {
+              level: 2,
+              start: 10,
+              style: "lower-hex",
+              format: "%{@-1:full}.%{:value}",
+            },
+          ],
+        },
+      ],
+    });
+    const counter = getCounterDefinition(config, "section");
+
+    expect(renderCounterFormat(counter, [], 1)).toBe("5:5");
+    expect(renderCounterFormat(counter, [5], 2)).toBe("5:5.a");
+  });
+
   it("renders value and full placeholders", () => {
     const config = normalizeCounterConfig({
       counters: [
@@ -464,7 +550,7 @@ describe("buildCounterTimeline", () => {
     );
 
     expect(timeline.snapshots.a.level).toBe(2);
-    expect(timeline.snapshots.a.display).toBe("0.1");
+    expect(timeline.snapshots.a.display).toBe("1.1");
     expect(timeline.snapshots.b.level).toBe(1);
     expect(timeline.snapshots.b.display).toBe("Theorem I");
   });
@@ -508,6 +594,114 @@ describe("buildCounterTimeline", () => {
 
     expect(timeline.snapshots.a.level).toBe(1);
     expect(timeline.snapshots.a.display).toBe("1");
+  });
+
+  it("uses per-level starts for display, increment, and reset", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "before",
+          counter: "section",
+          level: 1,
+          action: "display",
+          slideNo: 1,
+          order: 0,
+        },
+        {
+          id: "chapter",
+          counter: "section",
+          level: 1,
+          action: "step",
+          slideNo: 1,
+          order: 1,
+        },
+        {
+          id: "first-section",
+          counter: "section",
+          level: 2,
+          action: "step",
+          slideNo: 2,
+          order: 0,
+        },
+        {
+          id: "second-section",
+          counter: "section",
+          level: 2,
+          action: "step",
+          slideNo: 2,
+          order: 1,
+        },
+        {
+          id: "next-chapter",
+          counter: "section",
+          level: 1,
+          action: "step",
+          slideNo: 3,
+          order: 0,
+        },
+        {
+          id: "reset-section",
+          counter: "section",
+          level: 2,
+          action: "display",
+          slideNo: 3,
+          order: 1,
+        },
+      ],
+      {
+        counters: [
+          {
+            id: "section",
+            levels: [
+              { level: 1, start: 5 },
+              { level: 2, start: 10, style: "lower-hex" },
+            ],
+          },
+        ],
+      },
+    );
+
+    expect(timeline.snapshots.before.display).toBe("5");
+    expect(timeline.snapshots.chapter.display).toBe("5");
+    expect(timeline.snapshots["first-section"].display).toBe("5.a");
+    expect(timeline.snapshots["second-section"].display).toBe("5.b");
+    expect(timeline.snapshots["next-chapter"].display).toBe("6");
+    expect(timeline.snapshots["reset-section"].display).toBe("6.a");
+  });
+
+  it("supports zero-based levels", () => {
+    const timeline = buildCounterTimeline(
+      [
+        {
+          id: "first",
+          counter: "items",
+          action: "step",
+          slideNo: 1,
+          order: 0,
+        },
+        {
+          id: "second",
+          counter: "items",
+          action: "increment",
+          slideNo: 1,
+          order: 1,
+        },
+        {
+          id: "current",
+          counter: "items",
+          action: "display",
+          slideNo: 1,
+          order: 2,
+        },
+      ],
+      {
+        counters: [{ id: "items", levels: [{ level: 1, start: 0 }] }],
+      },
+    );
+
+    expect(timeline.snapshots.first.display).toBe("0");
+    expect(timeline.snapshots.second.display).toBe("1");
+    expect(timeline.snapshots.current.display).toBe("1");
   });
 });
 

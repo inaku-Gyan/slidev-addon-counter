@@ -65,6 +65,37 @@ export default defineCounterConfig({
       ],
     },
     {
+      id: "numberStyles",
+      levels: [
+        {
+          level: 1,
+          alias: "zeroBased",
+          start: 0,
+          format: "Zero-based %{:value}",
+        },
+        {
+          level: 2,
+          alias: "padded",
+          style: "decimal-leading-zero",
+          format: "Padded %{:value}",
+        },
+        {
+          level: 3,
+          alias: "lowerHex",
+          start: 10,
+          style: "lower-hex",
+          format: "Lower hex %{:value}",
+        },
+        {
+          level: 4,
+          alias: "upperHex",
+          start: 10,
+          style: "upper-hex",
+          format: "Upper hex %{:value}",
+        },
+      ],
+    },
+    {
       id: "taskFlow",
       defaultLevel: "task",
       levels: [

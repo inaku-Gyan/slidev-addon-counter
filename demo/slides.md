@@ -193,6 +193,73 @@ Next: <Counter id="theorem" action="step" />
 
 <CounterInc id="demoExample" :level="1" />
 
+## <Counter id="demoExample" /> Number styles and starts: config
+
+```ts
+const numberStylesCounter = {
+  id: "numberStyles",
+  levels: [
+    {
+      level: 1,
+      alias: "zeroBased",
+      start: 0,
+      format: "Zero-based %{:value}",
+    },
+    {
+      level: 2,
+      alias: "padded",
+      style: "decimal-leading-zero",
+      format: "Padded %{:value}",
+    },
+    {
+      level: 3,
+      alias: "lowerHex",
+      start: 10,
+      style: "lower-hex",
+      format: "Lower hex %{:value}",
+    },
+    {
+      level: 4,
+      alias: "upperHex",
+      start: 10,
+      style: "upper-hex",
+      format: "Upper hex %{:value}",
+    },
+  ],
+};
+```
+
+`start` is configured per level. It controls the first value, the value shown
+before the first increment, and the value restored after a reset.
+
+---
+
+## <Counter id="demoExample" /> Number styles and starts: usage and output
+
+### Slide source
+
+```md
+Zero-based: <Counter id="numberStyles" level="zeroBased" />
+Padded: <Counter id="numberStyles" level="padded" />
+Lower hex: <Counter id="numberStyles" level="lowerHex" />
+Upper hex: <Counter id="numberStyles" level="upperHex" />
+
+Next lower hex: <Counter id="numberStyles" level="lowerHex" />
+```
+
+### Rendered
+
+Zero-based: <Counter id="numberStyles" level="zeroBased" />
+Padded: <Counter id="numberStyles" level="padded" />
+Lower hex: <Counter id="numberStyles" level="lowerHex" />
+Upper hex: <Counter id="numberStyles" level="upperHex" />
+
+Next lower hex: <Counter id="numberStyles" level="lowerHex" />
+
+---
+
+<CounterInc id="demoExample" :level="1" />
+
 ## <Counter id="demoExample" /> Independent counters: config
 
 ```ts

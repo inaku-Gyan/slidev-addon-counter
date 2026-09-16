@@ -75,6 +75,20 @@ Use the configured aliases and default level in slides:
 Current section: <CounterDisplay id="section" />
 ```
 
+### Styles and starting values
+
+Each level can start at its own non-negative safe integer and use a built-in number style:
+
+```ts
+levels: [
+  { level: 1, start: 0 },
+  { level: 2, start: 10, style: "lower-hex", format: "Hex %{:value}" },
+  { level: 3, style: "decimal-leading-zero" },
+];
+```
+
+Available hexadecimal styles are `lower-hex` and `upper-hex`. The padded decimal style is named `decimal-leading-zero` and formats values with at least two digits.
+
 ## More Examples
 
 The [live demo](https://inaku-Gyan.github.io/slidev-addon-counter/) shows richer examples with the config, slide source, and rendered output side by side.
