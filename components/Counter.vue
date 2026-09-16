@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import { snapshots } from "virtual:slidev-addon-counter/snapshots";
+import { revision, snapshots } from "virtual:slidev-addon-counter/snapshots";
 
 const props = withDefaults(
   defineProps<{
@@ -24,6 +24,16 @@ const displayText = computed(() => {
 
   return props.op ? (snapshots[props.op]?.display ?? "") : "";
 });
+
+const isBenchmark =
+  import.meta.env.DEV &&
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).has("counter-bench");
 </script>
 
-<template>{{ displayText }}</template>
+<template>
+  <span v-if="isBenchmark" :data-counter-bench-revision="revision">
+    {{ displayText }}
+  </span>
+  <template v-else>{{ displayText }}</template>
+</template>

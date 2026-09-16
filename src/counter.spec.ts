@@ -9,6 +9,7 @@ import {
   normalizeCounterConfig,
   renderCounterFormat,
 } from "./counter";
+import { buildCounterTimelineState } from "./counter-timeline";
 
 describe("formatCounterValue", () => {
   it("formats built-in styles", () => {
@@ -507,6 +508,61 @@ describe("buildCounterTimeline", () => {
 
     expect(timeline.snapshots.a.level).toBe(1);
     expect(timeline.snapshots.a.display).toBe("1");
+  });
+});
+
+describe("incremental counter timeline", () => {
+  it("matches a full rebuild from the earliest changed slide", () => {
+    const originalOperations = [
+      {
+        id: "slide-1",
+        counter: "default",
+        action: "step" as const,
+        slideNo: 1,
+        order: 0,
+      },
+      {
+        id: "slide-2",
+        counter: "default",
+        action: "step" as const,
+        slideNo: 2,
+        order: 0,
+      },
+      {
+        id: "slide-3",
+        counter: "default",
+        action: "display" as const,
+        slideNo: 3,
+        order: 0,
+      },
+    ];
+    const changedOperations = [
+      originalOperations[0],
+      {
+        ...originalOperations[1],
+        action: "display" as const,
+      },
+      originalOperations[2],
+    ];
+
+    const previous = buildCounterTimelineState(
+      originalOperations,
+      undefined,
+      undefined,
+      1,
+      3,
+    );
+    const incremental = buildCounterTimelineState(
+      changedOperations,
+      undefined,
+      previous,
+      2,
+      3,
+    );
+
+    expect(incremental.timeline).toEqual(
+      buildCounterTimeline(changedOperations, undefined),
+    );
   });
 });
 

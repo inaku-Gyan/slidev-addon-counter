@@ -9,6 +9,14 @@ declare module "*.vue" {
   export default component;
 }
 
+interface ImportMetaEnv {
+  readonly DEV: boolean;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module "virtual:slidev-addon-counter/snapshots" {
   export type CounterAction = "step" | "increment" | "display";
   export type LevelRef = number | string;
@@ -32,6 +40,7 @@ declare module "virtual:slidev-addon-counter/snapshots" {
     display: string;
   }
 
+  export const revision: string | number;
   export const snapshots: Record<string, CounterSnapshot>;
   export const operations: CounterOperation[];
 }

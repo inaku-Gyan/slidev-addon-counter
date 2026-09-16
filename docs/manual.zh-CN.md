@@ -532,6 +532,19 @@ counter `id` 必须已经在配置中定义。唯一例外是 `default`，插件
 
 Roman 样式只支持 `1..3999`。CJK 样式支持 `0..9999`。正常递增不会产生 `0`，但 `display` 在尚未递增时可能显示当前层级的 `0`。
 
+## 开发环境 HMR 和 benchmark
+
+在 Slidev 开发模式下，修改 slide 内容或 counter 配置时，插件会通过自身的 HMR 路径更新，不会触发浏览器整页刷新。插件会保留当前演示状态，并从最早受影响的位置更新 counter 数据。新增、删除或重排 slide 时，如果无法安全地增量更新，可能会使用完整重建或刷新作为后备路径。
+
+仓库提供了一个可选 benchmark，会自动生成 10、100、500 页的确定性 deck。它在无头浏览器中测量从保存文件到渲染完成的延迟，并分别报告 deck 开头、中间、结尾编辑以及配置编辑的 P50/P95：
+
+```bash
+pnpm exec playwright install chromium
+pnpm bench
+```
+
+benchmark 使用仅开发态的渲染标记，不会改变插件公开的组件 API。如果使用已有的 Chromium 可执行文件而不是 Playwright 管理的浏览器，可以设置 `SLIDEV_COUNTER_BENCH_CHROMIUM`。
+
 ## TypeScript API
 
 配置文件可以从 `slidev-addon-counter/config` 导入类型和辅助函数：

@@ -1,6 +1,8 @@
 import { parseDocument } from "htmlparser2";
 import MarkdownIt from "markdown-it";
 
+import { buildCounterTimelineState } from "./counter-timeline";
+
 export type CounterStyle =
   | "decimal"
   | "zero"
@@ -313,60 +315,7 @@ export function buildCounterTimeline(
   operations: readonly CounterOperation[],
   config: CounterConfig | NormalizedCounterConfig | undefined,
 ): CounterTimeline {
-  const normalized = isNormalizedCounterConfig(config)
-    ? config
-    : normalizeCounterConfig(config);
-
-  const sorted = [...operations].sort((a, b) => {
-    return a.slideNo - b.slideNo || a.order - b.order;
-  });
-
-  const states = new Map<string, number[]>();
-  const snapshots: Record<string, CounterSnapshot> = {};
-
-  for (const operation of sorted) {
-    const counter = getCounterDefinition(normalized, operation.counter);
-    const level =
-      operation.level == null
-        ? counter.defaultLevel
-        : resolveLevelRef(counter, operation.level, 1);
-    const counts = states.get(operation.counter) ?? [];
-
-    if (operation.action === "step" || operation.action === "increment") {
-      for (let i = 0; i < level - 1; i += 1) {
-        counts[i] ??= 0;
-      }
-
-      counts[level - 1] = (counts[level - 1] ?? 0) + 1;
-
-      if (getLevelConfig(counter, level).reset === "lower") {
-        counts.length = level;
-      }
-
-      states.set(operation.counter, counts);
-    }
-
-    const snapshotCounts = [...counts];
-    snapshots[operation.id] = {
-      id: operation.id,
-      counter: operation.counter,
-      level,
-      action: operation.action,
-      counts: snapshotCounts,
-      display: renderCounterFormat(counter, snapshotCounts, level),
-    };
-  }
-
-  return {
-    snapshots,
-    operations: sorted,
-  };
-}
-
-function isNormalizedCounterConfig(
-  config: CounterConfig | NormalizedCounterConfig | undefined,
-): config is NormalizedCounterConfig {
-  return config?.counters instanceof Map;
+  return buildCounterTimelineState(operations, config).timeline;
 }
 
 export function extractCounterOperations(

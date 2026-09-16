@@ -532,6 +532,19 @@ Levels and aliases cannot be duplicated within the same counter.
 
 Roman styles support `1..3999`. CJK style supports `0..9999`. Normal increments do not produce `0`, but `display` can show `0` if the selected level has not been incremented yet.
 
+## Development HMR and Benchmark
+
+While running Slidev in development, edits to slide content and the counter configuration are applied through the addon's HMR path without a full browser reload. The addon preserves the current presentation state and updates counter data from the earliest affected point. Adding, removing, or reordering slides may use a full rebuild or reload when an incremental update is not safe.
+
+The repository includes an opt-in benchmark that generates deterministic decks with 10, 100, and 500 slides. It measures save-to-render latency in a headless browser and reports P50/P95 values for edits near the start, middle, and end of a deck, plus configuration edits:
+
+```bash
+pnpm exec playwright install chromium
+pnpm bench
+```
+
+The benchmark uses a development-only render marker and does not change the addon's public component API. Set `SLIDEV_COUNTER_BENCH_CHROMIUM` when using an existing Chromium executable instead of Playwright's managed browser.
+
 ## TypeScript API
 
 Config files can import helpers and types from `slidev-addon-counter/config`:
