@@ -199,35 +199,16 @@ Next: <Counter id="theorem" action="step" />
 const numberStylesCounter = {
   id: "numberStyles",
   levels: [
-    {
-      level: 1,
-      alias: "zeroBased",
-      start: 0,
-      format: "Zero-based %{:value}",
-    },
-    {
-      level: 2,
-      alias: "padded",
-      style: "decimal-leading-zero",
-      format: "Padded %{:value}",
-    },
-    {
-      level: 3,
-      alias: "lowerHex",
-      start: 10,
-      style: "lower-hex",
-      format: "Lower hex %{:value}",
-    },
-    {
-      level: 4,
-      alias: "upperHex",
-      start: 10,
-      style: "upper-hex",
-      format: "Upper hex %{:value}",
-    },
+    { level: 1, start: 0 },
+    { level: 2, style: "decimal-leading-zero" },
+    { level: 3, start: 10, style: "lower-hex" },
+    { level: 4, start: 10, style: "upper-hex" },
   ],
 };
 ```
+
+The example keeps the focus on `start` and `style`; the full demo config also
+adds aliases.
 
 `start` is configured per level. It controls the first value, the value shown
 before the first increment, and the value restored after a reset.
@@ -239,22 +220,21 @@ before the first increment, and the value restored after a reset.
 ### Slide source
 
 ```md
-Zero-based: <Counter id="numberStyles" level="zeroBased" />
-Padded: <Counter id="numberStyles" level="padded" />
-Lower hex: <Counter id="numberStyles" level="lowerHex" />
-Upper hex: <Counter id="numberStyles" level="upperHex" />
+Zero-based: <Counter id="numberStyles" level="1" />
+Padded: <Counter id="numberStyles" level="2" />
+Lower hex: <Counter id="numberStyles" level="3" />
+Upper hex: <Counter id="numberStyles" level="4" />
 
-Next lower hex: <Counter id="numberStyles" level="lowerHex" />
+Next lower hex: <Counter id="numberStyles" level="3" />
 ```
 
 ### Rendered
 
-Zero-based: <Counter id="numberStyles" level="zeroBased" />
-Padded: <Counter id="numberStyles" level="padded" />
-Lower hex: <Counter id="numberStyles" level="lowerHex" />
-Upper hex: <Counter id="numberStyles" level="upperHex" />
-
-Next lower hex: <Counter id="numberStyles" level="lowerHex" />
+Zero-based: <Counter id="numberStyles" level="1" /><br />
+Padded: <Counter id="numberStyles" level="2" /><br />
+Lower hex: <Counter id="numberStyles" level="3" /><br />
+Upper hex: <Counter id="numberStyles" level="4" /><br /><br />
+Next lower hex: <Counter id="numberStyles" level="3" />
 
 ---
 
