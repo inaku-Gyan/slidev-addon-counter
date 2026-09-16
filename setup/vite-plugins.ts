@@ -4,12 +4,11 @@ import { pathToFileURL } from "node:url";
 
 import { createJiti } from "jiti";
 
+import type { CounterConfig } from "../src/counter";
 import {
-  buildCounterTimeline,
-  extractCounterOperations,
-  normalizeCounterConfig,
-  type CounterConfig,
-} from "../src/counter";
+  createCounterSnapshotStore,
+  type SnapshotSlide,
+} from "./snapshot-store";
 
 const CONFIG_FILE = "slidev-addon-counter.config.ts";
 const VIRTUAL_ID = "virtual:slidev-addon-counter/snapshots";
@@ -18,6 +17,7 @@ const DIRECT_VIRTUAL_PATHS = [
   "/virtual:slidev-addon-counter/snapshots",
   "/@slidev-addon-counter/snapshots",
 ];
+const HMR_BATCH_WINDOW_MS = 10;
 
 interface CounterPluginOptions {
   userRoot: string;
@@ -57,18 +57,30 @@ interface ViteDevServerLike {
   watcher: {
     add: (path: string | string[]) => void;
   };
-  ws: {
-    send: (payload: {
-      path?: string;
-      timestamp?: number;
-      type: string;
-    }) => void;
-  };
+}
+
+interface HotUpdateWaiter {
+  modules: readonly object[];
+  resolve: (modules: object[]) => void;
+  reject: (error: unknown) => void;
+}
+
+interface PendingHotUpdate {
+  server: ViteDevServerLike;
+  configChanged: boolean;
+  waiters: HotUpdateWaiter[];
 }
 
 export default function counterVitePlugins(
   options: CounterPluginOptions,
 ): unknown[] {
+  const snapshotStore = createCounterSnapshotStore();
+  let configRevision = 0;
+  let loadedConfigRevision: number | undefined;
+  let loadedConfig: CounterConfig | undefined;
+  let revision = 0;
+  let pendingHotUpdate: PendingHotUpdate | undefined;
+
   return [
     {
       name: "slidev-addon-counter",
@@ -93,7 +105,7 @@ export default function counterVitePlugins(
             return;
           }
 
-          createSnapshotModule(options)
+          getSnapshotModule()
             .then((code) => {
               res.statusCode = 200;
               res.setHeader("Content-Type", "text/javascript");
@@ -107,49 +119,113 @@ export default function counterVitePlugins(
           return undefined;
         }
 
-        return createSnapshotModule(options);
+        return getSnapshotModule();
       },
-      async handleHotUpdate(ctx: { file: string; server: ViteDevServerLike }) {
+      async handleHotUpdate(ctx: {
+        file: string;
+        modules?: object[];
+        server: ViteDevServerLike;
+      }) {
         if (!isCounterDependency(ctx.file, options)) {
           return undefined;
         }
 
-        await invalidateSnapshotModule(ctx.server);
-        queueFullReload(ctx.server);
-
-        return undefined;
+        return queueHotUpdate(
+          ctx.server,
+          isCounterConfigFile(ctx.file, options),
+          ctx.modules ?? [],
+        );
       },
     },
   ];
+
+  function queueHotUpdate(
+    server: ViteDevServerLike,
+    configChanged: boolean,
+    modules: readonly object[],
+  ): Promise<object[]> {
+    return new Promise((resolve, reject) => {
+      if (!pendingHotUpdate) {
+        pendingHotUpdate = {
+          server,
+          configChanged,
+          waiters: [],
+        };
+        setTimeout(() => {
+          if (pendingHotUpdate) {
+            void flushHotUpdate(pendingHotUpdate);
+          }
+        }, HMR_BATCH_WINDOW_MS);
+      } else {
+        pendingHotUpdate.configChanged ||= configChanged;
+      }
+
+      pendingHotUpdate.waiters.push({ modules, resolve, reject });
+    });
+  }
+
+  async function flushHotUpdate(batch: PendingHotUpdate): Promise<void> {
+    if (pendingHotUpdate !== batch) {
+      return;
+    }
+    pendingHotUpdate = undefined;
+
+    try {
+      if (batch.configChanged) {
+        configRevision += 1;
+      }
+      revision += 1;
+      const modules = uniqueModules([
+        ...batch.waiters.flatMap((waiter) => waiter.modules),
+        ...(await invalidateSnapshotModule(batch.server)),
+      ]);
+      batch.waiters.forEach((waiter, index) => {
+        waiter.resolve(index === 0 ? modules : []);
+      });
+    } catch (error) {
+      for (const waiter of batch.waiters) {
+        waiter.reject(error);
+      }
+    }
+  }
+
+  async function getUserConfig(): Promise<CounterConfig | undefined> {
+    if (loadedConfigRevision === configRevision) {
+      return loadedConfig;
+    }
+
+    const nextConfig = await loadUserConfig(options.userRoot);
+    loadedConfig = nextConfig;
+    loadedConfigRevision = configRevision;
+    return nextConfig;
+  }
+
+  async function getSnapshotModule(): Promise<string> {
+    const result = snapshotStore.createSnapshotModule(
+      toSnapshotSlides(options.data.slides),
+      await getUserConfig(),
+      configRevision,
+      revision,
+    );
+    return result.code;
+  }
 }
 
-async function createSnapshotModule(
-  options: CounterPluginOptions,
-): Promise<string> {
-  const rawConfig = await loadUserConfig(options.userRoot);
-  const config = normalizeCounterConfig(rawConfig);
-  const operations = options.data.slides.flatMap((slide) =>
-    extractCounterOperations(
-      slide.source.content,
-      slide.index + 1,
-      slide.title,
-    ),
-  );
-  const timeline = buildCounterTimeline(operations, config);
-
-  return [
-    `export const snapshots = ${JSON.stringify(timeline.snapshots, null, 2)}`,
-    `export const operations = ${JSON.stringify(timeline.operations, null, 2)}`,
-  ].join("\n");
+function toSnapshotSlides(slides: readonly SlideSource[]): SnapshotSlide[] {
+  return slides.map((slide) => ({
+    index: slide.index,
+    title: slide.title,
+    content: slide.source.content,
+    filepath: slide.source.filepath,
+  }));
 }
 
 function watchCounterDependencies(
   server: ViteDevServerLike,
   options: CounterPluginOptions,
 ): void {
-  const configPath = getConfigPath(options.userRoot);
   const paths = [
-    ...(configPath ? [configPath] : []),
+    getConfigFilePath(options.userRoot),
     ...options.data.slides.map((slide) => slide.source.filepath),
   ];
 
@@ -158,7 +234,7 @@ function watchCounterDependencies(
 
 async function invalidateSnapshotModule(
   server: ViteDevServerLike,
-): Promise<void> {
+): Promise<object[]> {
   const modules = [
     server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID),
     server.moduleGraph.getModuleById(VIRTUAL_ID),
@@ -172,6 +248,8 @@ async function invalidateSnapshotModule(
   for (const module of modules) {
     server.moduleGraph.invalidateModule(module);
   }
+
+  return modules;
 }
 
 async function loadUserConfig(
@@ -190,8 +268,12 @@ async function loadUserConfig(
 }
 
 function getConfigPath(userRoot: string): string | undefined {
-  const configPath = join(userRoot, CONFIG_FILE);
+  const configPath = getConfigFilePath(userRoot);
   return existsSync(configPath) ? configPath : undefined;
+}
+
+function getConfigFilePath(userRoot: string): string {
+  return join(userRoot, CONFIG_FILE);
 }
 
 function isDirectVirtualRequest(url: string | undefined): boolean {
@@ -222,20 +304,9 @@ function isCounterConfigFile(
   options: CounterPluginOptions,
 ): boolean {
   const normalizedFile = normalize(file);
-  const configPath = getConfigPath(options.userRoot);
-  if (configPath && normalize(configPath) === normalizedFile) {
-    return true;
-  }
-
-  return false;
+  return normalize(getConfigFilePath(options.userRoot)) === normalizedFile;
 }
 
-function queueFullReload(server: ViteDevServerLike): void {
-  setTimeout(() => {
-    server.ws.send({
-      type: "full-reload",
-      path: "*",
-      timestamp: Date.now(),
-    });
-  }, 50);
+function uniqueModules(modules: readonly object[]): object[] {
+  return [...new Set(modules)];
 }

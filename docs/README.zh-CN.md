@@ -99,3 +99,10 @@ pnpm check
 ```bash
 pnpm dev
 ```
+
+运行自动生成的 HMR benchmark（可选，需要 Chromium）：
+
+```bash
+pnpm exec playwright install chromium
+pnpm bench
+```

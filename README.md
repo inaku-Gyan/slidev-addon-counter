@@ -99,3 +99,10 @@ Preview the local demo:
 ```bash
 pnpm dev
 ```
+
+Run the generated HMR benchmark (optional; requires Chromium):
+
+```bash
+pnpm exec playwright install chromium
+pnpm bench
+```
