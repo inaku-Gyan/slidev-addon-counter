@@ -1,6 +1,6 @@
 {
   "name": "slidev-addon-counter",
-  "version": "0.2.1",
+  "version": "0.3.0-alpha.1",
   "description": "Multi-level counters for Slidev.",
   "type": "module",
   "private": false,
