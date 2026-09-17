@@ -3,7 +3,7 @@ import MarkdownIt from "markdown-it";
 
 import { buildCounterTimelineState } from "./counter-timeline";
 
-export type CounterStyle =
+export type BuiltinCounterStyle =
   | "decimal"
   | "decimal-leading-zero"
   | "lower-alpha"
@@ -13,6 +13,10 @@ export type CounterStyle =
   | "lower-roman"
   | "upper-roman"
   | "cjk";
+
+export type CounterFormatter = (value: number) => string;
+
+export type CounterStyle = BuiltinCounterStyle | CounterFormatter;
 
 export type CounterReset = "lower" | "none";
 export type CounterAction = "step" | "increment" | "display";
@@ -40,7 +44,7 @@ export interface CounterConfig {
 export interface NormalizedCounterLevel {
   level: number;
   alias?: string;
-  style: CounterStyle;
+  formatter: CounterFormatter;
   start: number;
   format: string;
   reset: CounterReset;
@@ -102,17 +106,17 @@ interface HtmlNode {
   startIndex?: number | null;
 }
 
-const BUILTIN_STYLES = new Set<CounterStyle>([
-  "decimal",
-  "decimal-leading-zero",
-  "lower-alpha",
-  "upper-alpha",
-  "lower-hex",
-  "upper-hex",
-  "lower-roman",
-  "upper-roman",
-  "cjk",
-]);
+const BUILTIN_FORMATTERS: Record<BuiltinCounterStyle, CounterFormatter> = {
+  decimal: (value) => String(value),
+  "decimal-leading-zero": (value) => String(value).padStart(2, "0"),
+  "lower-alpha": (value) => toAlphabetic(value),
+  "upper-alpha": (value) => toAlphabetic(value).toUpperCase(),
+  "lower-hex": (value) => toHex(value),
+  "upper-hex": (value) => toHex(value).toUpperCase(),
+  "lower-roman": (value) => toRoman(value),
+  "upper-roman": (value) => toRoman(value).toUpperCase(),
+  cjk: (value) => toCjk(value),
+};
 
 const BUILTIN_RESETS = new Set<CounterReset>(["lower", "none"]);
 const BUILTIN_PLACEHOLDER_KINDS = new Set(["value", "raw", "full"]);
@@ -168,10 +172,10 @@ export function normalizeCounterConfig(
         aliases.set(levelConfig.alias, levelConfig.level);
       }
 
-      const style = levelConfig.style ?? "decimal";
-      if (!BUILTIN_STYLES.has(style)) {
-        throw new Error(`${levelPath}.style "${style}" is not supported.`);
-      }
+      const formatter = resolveFormatter(
+        levelConfig.style ?? "decimal",
+        `${levelPath}.style`,
+      );
 
       const start = levelConfig.start ?? 1;
       validateStart(start, `${levelPath}.start`);
@@ -184,7 +188,7 @@ export function normalizeCounterConfig(
       levels.set(levelConfig.level, {
         level: levelConfig.level,
         alias: levelConfig.alias,
-        style,
+        formatter,
         start,
         format: levelConfig.format ?? getDefaultFormat(levelConfig.level),
         reset,
@@ -234,7 +238,7 @@ export function getLevelConfig(
   return (
     counter.levels.get(level) ?? {
       level,
-      style: "decimal",
+      formatter: BUILTIN_FORMATTERS.decimal,
       start: 1,
       format: getDefaultFormat(level),
       reset: "lower",
@@ -286,30 +290,11 @@ export function formatCounterValue(
   value: number,
   style: CounterStyle = "decimal",
 ): string {
-  if (style === "decimal-leading-zero") {
-    return String(value).padStart(2, "0");
-  }
-
-  if (style === "lower-alpha" || style === "upper-alpha") {
-    const alphabetic = toAlphabetic(value);
-    return style === "upper-alpha" ? alphabetic.toUpperCase() : alphabetic;
-  }
-
-  if (style === "lower-hex" || style === "upper-hex") {
-    const hexadecimal = toHex(value);
-    return style === "upper-hex" ? hexadecimal.toUpperCase() : hexadecimal;
-  }
-
-  if (style === "lower-roman" || style === "upper-roman") {
-    const roman = toRoman(value);
-    return style === "upper-roman" ? roman.toUpperCase() : roman;
-  }
-
-  if (style === "cjk") {
-    return toCjk(value);
-  }
-
-  return String(value);
+  return invokeFormatter(
+    resolveFormatter(style, "style"),
+    value,
+    "style formatter",
+  );
 }
 
 export function renderCounterFormat(
@@ -529,9 +514,10 @@ function renderFullLevel(context: RenderContext): string {
 function renderLevelValue(context: RenderContext, ref: string): string {
   const level = resolveLevelRef(context.counter, ref, context.currentLevel);
   const levelConfig = getLevelConfig(context.counter, level);
-  return formatCounterValue(
+  return invokeFormatter(
+    levelConfig.formatter,
     getCounterLevelValue(context.counter, context.counts, level),
-    levelConfig.style,
+    `counter "${context.counter.id}" level ${level} formatter`,
   );
 }
 
@@ -640,6 +626,34 @@ function parsePlaceholder(
   }
 
   return { ref, kind };
+}
+
+function resolveFormatter(
+  style: CounterStyle,
+  label: string,
+): CounterFormatter {
+  if (typeof style === "function") {
+    return style;
+  }
+
+  if (!Object.hasOwn(BUILTIN_FORMATTERS, style)) {
+    throw new Error(`${label} "${style}" is not supported.`);
+  }
+
+  return BUILTIN_FORMATTERS[style];
+}
+
+function invokeFormatter(
+  formatter: CounterFormatter,
+  value: number,
+  label: string,
+): string {
+  const formatted = formatter(value);
+  if (typeof formatted !== "string") {
+    throw new Error(`${label} must return a string, got ${typeof formatted}.`);
+  }
+
+  return formatted;
 }
 
 function toAlphabetic(value: number): string {

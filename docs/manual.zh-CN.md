@@ -120,14 +120,14 @@ export default defineCounterConfig({
 
 每个 level 支持这些字段：
 
-| 字段     | 类型                | 默认值                                                   | 说明                                     |
-| -------- | ------------------- | -------------------------------------------------------- | ---------------------------------------- |
-| `level`  | `number`            | 无                                                       | 正整数层级，从 `1` 开始。                |
-| `alias`  | `string`            | 无                                                       | 层级别名，可在组件和格式引用中使用。     |
-| `style`  | `CounterStyle`      | `"decimal"`                                              | 当前层级的编号样式。                     |
-| `start`  | `number`            | `1`                                                      | 当前层级的第一个值，必须是非负安全整数。 |
-| `format` | `string`            | level 1 为 `%{:value}`，更深层为 `%{@-1:full}.%{:value}` | 当前层级完整显示文本。                   |
-| `reset`  | `"lower" \| "none"` | `"lower"`                                                | 当前层级递增后是否重置更深层级。         |
+| 字段     | 类型                | 默认值                                                   | 说明                                      |
+| -------- | ------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| `level`  | `number`            | 无                                                       | 正整数层级，从 `1` 开始。                 |
+| `alias`  | `string`            | 无                                                       | 层级别名，可在组件和格式引用中使用。      |
+| `style`  | `CounterStyle`      | `"decimal"`                                              | 内置编号样式名称，或同步 formatter 函数。 |
+| `start`  | `number`            | `1`                                                      | 当前层级的第一个值，必须是非负安全整数。  |
+| `format` | `string`            | level 1 为 `%{:value}`，更深层为 `%{@-1:full}.%{:value}` | 当前层级完整显示文本。                    |
+| `reset`  | `"lower" \| "none"` | `"lower"`                                                | 当前层级递增后是否重置更深层级。          |
 
 未声明的 level 仍然可用，会使用默认配置。例如只声明 level 1 后，仍然可以使用 `level={2}`，显示格式默认为 `1.1`。未声明的 level 使用 `start: 1`。
 
@@ -253,6 +253,24 @@ levels: [
 ```
 
 它们的第一个值分别是 `0` 和 `a`。
+
+### 自定义 formatter
+
+`style` 也可以接受一个同步 formatter 函数。它会接收当前 level 的逻辑计数值（包含配置的 `start`），并返回 `%{:value}` 使用的显示文本：
+
+```ts
+levels: [
+  {
+    level: 1,
+    alias: "ticket",
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+    format: "%{:value}",
+  },
+];
+```
+
+第一次 `step` 会显示 `T-0100`。formatter 在插件解析 counter 配置时运行，不在浏览器中运行，因此必须是同步函数并且返回字符串；返回非字符串会报错，而 formatter 自身抛出的异常会原样保留。`value` 占位符会使用 formatter，`raw` 占位符会绕过 formatter，直接使用逻辑值。
 
 示例：
 
@@ -552,6 +570,8 @@ counter `id` 必须已经在配置中定义。唯一例外是 `default`，插件
 
 `start` 必须是非负安全整数。十进制和十六进制样式支持 `0`；字母和罗马数字样式要求正数，罗马数字范围为 `1..3999`。CJK 样式支持 `0..9999`。第一次递增前，`display` 会显示所选 level 配置的 `start`。
 
+`style` 可以接受内置样式名称或同步 formatter 函数。formatter 只影响 `value` 占位符；`raw` 占位符始终使用逻辑值。
+
 ## 开发环境 HMR 和 benchmark
 
 在 Slidev 开发模式下，修改 slide 内容或 counter 配置时，插件会通过自身的 HMR 路径更新，不会触发浏览器整页刷新。插件会保留当前演示状态，并从最早受影响的位置更新 counter 数据。新增、删除或重排 slide 时，如果无法安全地增量更新，可能会使用完整重建或刷新作为后备路径。
@@ -572,13 +592,17 @@ benchmark 使用仅开发态的渲染标记，不会改变插件公开的组件 
 ```ts
 import {
   defineCounterConfig,
+  type BuiltinCounterStyle,
   type CounterConfig,
   type CounterDefinition,
+  type CounterFormatter,
   type CounterLevelConfig,
   type CounterReset,
   type CounterStyle,
 } from "slidev-addon-counter/config";
 ```
+
+`CounterStyle` 可以是内置的 `BuiltinCounterStyle` 名称，也可以是 `CounterFormatter`；其中 `CounterFormatter` 的类型是 `(value: number) => string`。
 
 通常只需要使用 `defineCounterConfig`：
 

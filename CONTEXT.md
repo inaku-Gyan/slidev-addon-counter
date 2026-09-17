@@ -1,6 +1,6 @@
 # Counter Addon Context
 
-This context defines the language and update semantics for the Slidev counter addon. It is intentionally limited to concepts that matter when the addon updates during presentation editing.
+This context defines the language and update semantics for the Slidev counter addon. It is intentionally limited to concepts specific to configuring and updating counters.
 
 ## Language
 
@@ -27,6 +27,22 @@ _Avoid_: normal update path
 **Counter timeline**:
 The ordered presentation-wide sequence of counter operations and the derived counter view data associated with them.
 _Avoid_: current-page counter state
+
+**Logical counter value**:
+The numeric value of a selected counter level before it is rendered as a display token or inserted into a full counter format.
+_Avoid_: formatted value, display text
+
+**Counter style**:
+The rule that turns a logical counter value into its display token. A style can be a built-in named style or a user-provided counter formatter.
+_Avoid_: full counter format
+
+**Counter formatter**:
+A synchronous function that turns one logical counter value into its display token.
+_Avoid_: full counter format, template
+
+**Counter format**:
+The per-level template that composes display tokens, raw logical values, and full references into the counter's display text.
+_Avoid_: style, formatter
 
 **Timeline rebuild boundary**:
 The earliest slide whose counter operations may have changed, from which later counter view data may need to be recomputed.

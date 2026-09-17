@@ -77,17 +77,22 @@ Current section: <CounterDisplay id="section" />
 
 ### Styles and starting values
 
-Each level can start at its own non-negative safe integer and use a built-in number style:
+Each level can start at its own non-negative safe integer and use a built-in number style or a custom formatter:
 
 ```ts
 levels: [
   { level: 1, start: 0 },
   { level: 2, start: 10, style: "lower-hex", format: "Hex %{:value}" },
   { level: 3, style: "decimal-leading-zero" },
+  {
+    level: 4,
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+  },
 ];
 ```
 
-Available hexadecimal styles are `lower-hex` and `upper-hex`. The padded decimal style is named `decimal-leading-zero` and formats values with at least two digits.
+Available hexadecimal styles are `lower-hex` and `upper-hex`. The padded decimal style is named `decimal-leading-zero` and formats values with at least two digits. A custom formatter receives the level's logical value and must return a string; see the [manual](./docs/manual.md#custom-formatters) for details.
 
 ## More Examples
 

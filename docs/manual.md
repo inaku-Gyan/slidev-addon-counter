@@ -124,12 +124,12 @@ Each level supports these fields:
 | -------- | ------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
 | `level`  | `number`            | None                                                         | Positive integer level, starting from `1`.                       |
 | `alias`  | `string`            | None                                                         | Level alias for component props and format refs.                 |
-| `style`  | `CounterStyle`      | `"decimal"`                                                  | Number style for this level.                                     |
+| `style`  | `CounterStyle`      | `"decimal"`                                                  | Built-in number style name or a synchronous formatter function.  |
 | `start`  | `number`            | `1`                                                          | First value for this level; must be a non-negative safe integer. |
 | `format` | `string`            | level 1: `%{:value}`; deeper levels: `%{@-1:full}.%{:value}` | Full display text for this level.                                |
 | `reset`  | `"lower" \| "none"` | `"lower"`                                                    | Whether incrementing this level resets deeper levels.            |
 
-Unconfigured levels are still usable. For example, if you only configure level 1, `level={2}` still works and defaults to the `1.1` style. Unconfigured levels use `start: 1`.
+Unconfigured levels are still usable. For example, if you only configure level 1, `level={2}` still works and defaults to the `1.1` format. Unconfigured levels use `start: 1`.
 
 `start` is configured independently for each level. It is the value produced by the first `step`, the value shown by `display` before the level has been incremented, and the value restored after a parent reset. `start` also affects `value`, `raw`, and `full` placeholders.
 
@@ -253,6 +253,24 @@ levels: [
 ```
 
 The first values are `0` and `a` respectively.
+
+### Custom Formatters
+
+`style` also accepts a synchronous formatter function. It receives the level's logical counter value, including its configured `start`, and returns the display token used by `%{:value}`:
+
+```ts
+levels: [
+  {
+    level: 1,
+    alias: "ticket",
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+    format: "%{:value}",
+  },
+];
+```
+
+The first `step` renders `T-0100`. Formatters run while the addon resolves the counter configuration, not in the browser, so they must be synchronous and must return a string; a non-string return raises an error, while exceptions thrown by the formatter are propagated unchanged. `value` references use the formatter, while `raw` references bypass it and expose the logical value.
 
 Example:
 
@@ -552,6 +570,8 @@ Levels and aliases cannot be duplicated within the same counter.
 
 `start` must be a non-negative safe integer. Decimal and hexadecimal styles support `0`; alphabetic and Roman styles require positive values, and Roman styles support `1..3999`. CJK style supports `0..9999`. Before the first increment, `display` shows the selected level's configured `start`.
 
+`style` accepts a built-in style name or a synchronous formatter function. Formatters only affect `value` placeholders; `raw` placeholders always use the logical value.
+
 ## Development HMR and Benchmark
 
 While running Slidev in development, edits to slide content and the counter configuration are applied through the addon's HMR path without a full browser reload. The addon preserves the current presentation state and updates counter data from the earliest affected point. Adding, removing, or reordering slides may use a full rebuild or reload when an incremental update is not safe.
@@ -572,13 +592,17 @@ Config files can import helpers and types from `slidev-addon-counter/config`:
 ```ts
 import {
   defineCounterConfig,
+  type BuiltinCounterStyle,
   type CounterConfig,
   type CounterDefinition,
+  type CounterFormatter,
   type CounterLevelConfig,
   type CounterReset,
   type CounterStyle,
 } from "slidev-addon-counter/config";
 ```
+
+`CounterStyle` is either a `BuiltinCounterStyle` name or a `CounterFormatter`, where `CounterFormatter` is `(value: number) => string`.
 
 Most configs only need `defineCounterConfig`:
 

@@ -1,6 +1,8 @@
 export type {
+  BuiltinCounterStyle,
   CounterConfig,
   CounterDefinition,
+  CounterFormatter,
   CounterLevelConfig,
   CounterReset,
   CounterStyle,

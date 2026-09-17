@@ -27,6 +27,16 @@ describe("formatCounterValue", () => {
     expect(formatCounterValue(12, "cjk")).toBe("十二");
   });
 
+  it("formats values with a custom formatter", () => {
+    expect(formatCounterValue(3, (value) => `#${value}`)).toBe("#3");
+  });
+
+  it("rejects non-string formatter results", () => {
+    expect(() => formatCounterValue(3, (() => 42) as never)).toThrow(
+      "style formatter must return a string, got number",
+    );
+  });
+
   it("rejects invalid hexadecimal values", () => {
     expect(() => formatCounterValue(-1, "lower-hex")).toThrow(
       "non-negative safe integer",
@@ -138,6 +148,22 @@ describe("normalizeCounterConfig", () => {
     expect(getLevelConfig(counter, 1).start).toBe(0);
     expect(getLevelConfig(counter, 2).start).toBe(10);
     expect(getLevelConfig(counter, 3).start).toBe(1);
+  });
+
+  it("normalizes custom formatter styles into level formatters", () => {
+    const formatter = (value: number) => `T-${String(value).padStart(4, "0")}`;
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "ticket",
+          levels: [{ level: 1, start: 100, style: formatter }],
+        },
+      ],
+    });
+    const counter = getCounterDefinition(config, "ticket");
+
+    expect(getLevelConfig(counter, 1).formatter).toBe(formatter);
+    expect(typeof getLevelConfig(counter, 2).formatter).toBe("function");
   });
 
   it("rejects invalid level starts", () => {
@@ -332,6 +358,74 @@ describe("renderCounterFormat", () => {
     const counter = getCounterDefinition(config, "theorem");
 
     expect(renderCounterFormat(counter, [4], 1)).toBe("T4=IV");
+  });
+
+  it("uses custom formatters for values but not raw refs", () => {
+    const config = normalizeCounterConfig({
+      counters: [
+        {
+          id: "ticket",
+          levels: [
+            {
+              level: 1,
+              alias: "ticket",
+              start: 100,
+              style: (value) => `T-${String(value).padStart(4, "0")}`,
+              format: "%{ticket:raw}/%{ticket:value}",
+            },
+          ],
+        },
+      ],
+    });
+    const counter = getCounterDefinition(config, "ticket");
+
+    expect(renderCounterFormat(counter, [100], 1)).toBe("100/T-0100");
+  });
+
+  it("propagates custom formatter errors and rejects non-string results", () => {
+    const thrown = new Error("formatter exploded");
+    const throwingCounter = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: [
+          {
+            id: "throwing",
+            levels: [
+              {
+                level: 1,
+                style: () => {
+                  throw thrown;
+                },
+              },
+            ],
+          },
+        ],
+      }),
+      "throwing",
+    );
+
+    let caught: unknown;
+    try {
+      renderCounterFormat(throwingCounter, [1], 1);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBe(thrown);
+
+    const invalidCounter = getCounterDefinition(
+      normalizeCounterConfig({
+        counters: [
+          {
+            id: "invalid",
+            levels: [{ level: 1, style: (() => 42) as never }],
+          },
+        ],
+      }),
+      "invalid",
+    );
+
+    expect(() => renderCounterFormat(invalidCounter, [1], 1)).toThrow(
+      'counter "invalid" level 1 formatter must return a string, got number',
+    );
   });
 
   it("rejects missing colon syntax, unknown placeholders, and recursive full refs", () => {

@@ -93,6 +93,13 @@ export default defineCounterConfig({
           style: "upper-hex",
           format: "%{:value}",
         },
+        {
+          level: 5,
+          alias: "ticket",
+          start: 100,
+          style: (value) => `T-${String(value).padStart(4, "0")}`,
+          format: "%{:value}",
+        },
       ],
     },
     {
