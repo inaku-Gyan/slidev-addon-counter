@@ -611,3 +611,23 @@ export default defineCounterConfig({
   counters: [{ id: "section" }],
 });
 ```
+
+## Advanced API
+
+The addon also exposes the lower-level helpers that power its built-in setup files, and they can be imported from `slidev-addon-counter/src/counter`. Treat this as an internal interface: names, signatures, and behavior may change between releases, including prereleases. Unless you are writing custom setup files or tooling against the addon, prefer `slidev-addon-counter/config`.
+
+```ts
+import {
+  formatCounterValue,
+  normalizeCounterConfig,
+} from "slidev-addon-counter/src/counter";
+```
+
+For example, `normalizeCounterConfig` validates and normalizes a config object, and `formatCounterValue` applies a built-in style or custom formatter to a number:
+
+```ts
+const config = normalizeCounterConfig({ counters: [{ id: "section" }] });
+const roman = formatCounterValue(4, "upper-roman"); // "IV"
+```
+
+The module exports more helpers and types than these examples; see `src/counter.ts` for the full list.
