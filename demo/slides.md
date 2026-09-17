@@ -199,10 +199,10 @@ Next: <Counter id="theorem" action="step" />
 const numberStylesCounter = {
   id: "numberStyles",
   levels: [
-    { level: 1, start: 0 },
-    { level: 2, style: "decimal-leading-zero" },
-    { level: 3, start: 10, style: "lower-hex" },
-    { level: 4, start: 10, style: "upper-hex" },
+    { level: 1, format: "%{:value}", start: 0 },
+    { level: 2, format: "%{:value}", style: "decimal-leading-zero" },
+    { level: 3, format: "%{:value}", style: "lower-hex", start: 10 },
+    { level: 4, format: "%{:value}", style: "upper-hex", start: 10 },
   ],
 };
 ```
