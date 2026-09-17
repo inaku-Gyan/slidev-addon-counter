@@ -36,7 +36,9 @@
     "docs/manual.zh-CN.md",
     "src/counter.ts",
     "src/counter-timeline.ts",
-    "setup",
+    "setup/snapshot-store.ts",
+    "setup/transformers.ts",
+    "setup/vite-plugins.ts",
     "README.md",
     "LICENSE"
   ],
