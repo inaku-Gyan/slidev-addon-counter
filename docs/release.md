@@ -3,6 +3,10 @@
 This package is published by GitHub Actions when a version tag is pushed.
 Do not publish from a local machine.
 
+`main` is protected: every change, including the version bump, lands through a
+pull request, and the release tag is pushed directly once that pull request is
+merged.
+
 ## Release operator checklist
 
 1. Start from an up-to-date `main` branch.
@@ -27,7 +31,13 @@ Do not publish from a local machine.
    pnpm pack --dry-run
    ```
 
-4. Bump the version and create the matching Git tag.
+4. Create a release branch.
+
+   ```bash
+   git switch -c chore/release-v0.1.1
+   ```
+
+5. Bump the version. This creates a version commit and a local tag.
 
    Stable patch release:
 
@@ -50,24 +60,52 @@ Do not publish from a local machine.
    `pnpm version` must create a tag like `v0.1.1`. The tag version must match
    `package.json.version` exactly after removing the leading `v`.
 
-5. Push the version commit and tag.
+   Do not push the tag yet. The release workflow runs on tag pushes, so the tag
+   must only be pushed after the version commit is on `main`.
+
+6. Push the branch and open a pull request against `main`.
 
    ```bash
-   git push --follow-tags
+   git push -u origin chore/release-v0.1.1
+   gh pr create --base main --fill
    ```
 
-6. Watch the `release` workflow in GitHub Actions. A successful workflow
+7. Merge the pull request with a merge commit.
+
+   Do not squash or rebase the release pull request: those rewrite the version
+   commit, and the tag would no longer point to a commit reachable from `main`.
+
+8. Update `main` and push the tag.
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   git push origin v0.1.1
+   ```
+
+   If the release pull request was squash-merged or rebase-merged, re-create the
+   tag on the merged commit before pushing it:
+
+   ```bash
+   git tag -d v0.1.1
+   git push --delete origin v0.1.1 # only if the old tag was already pushed
+   git tag v0.1.1
+   git push origin v0.1.1
+   ```
+
+9. Watch the `release` workflow in GitHub Actions. A successful workflow
    publishes to npm and creates the GitHub Release.
 
-7. After the workflow succeeds, verify npm dist-tags.
+10. After the workflow succeeds, verify npm dist-tags.
 
-   ```bash
-   npm dist-tag ls slidev-addon-counter
-   ```
+    ```bash
+    npm dist-tag ls slidev-addon-counter
+    ```
 
 ## Version and tag rules
 
 The release workflow only runs for tags matching `v*.*.*`.
+Every tag must point to a commit that is reachable from `main`.
 
 Valid examples:
 
