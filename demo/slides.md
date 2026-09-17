@@ -203,8 +203,8 @@ const numberStylesCounter = {
   levels: [
     { level: 1, format: "%{:value}", start: 0 },
     { level: 2, format: "%{:value}", style: "decimal-leading-zero" },
-    { level: 3, format: "%{:value}", style: "lower-hex", start: 10 },
-    { level: 4, format: "%{:value}", style: "upper-hex", start: 10 },
+    { level: 3, format: "%{:value}", start: 10, style: "lower-hex" },
+    { level: 4, format: "%{:value}", start: 10, style: "upper-hex" },
     { level: 5, format: "%{:value}", start: 100, style: ticket },
   ],
 };
