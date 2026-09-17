@@ -611,3 +611,23 @@ export default defineCounterConfig({
   counters: [{ id: "section" }],
 });
 ```
+
+## 高级 API
+
+插件还暴露了支撑内置 setup 文件的底层辅助函数，可以从 `slidev-addon-counter/src/counter` 导入。请把它当作内部接口：名称、签名和行为可能随版本变化，包括 prerelease。除非你是在为插件编写自定义 setup 文件或工具，否则请优先使用 `slidev-addon-counter/config`。
+
+```ts
+import {
+  formatCounterValue,
+  normalizeCounterConfig,
+} from "slidev-addon-counter/src/counter";
+```
+
+例如，`normalizeCounterConfig` 会校验并规范化配置对象，`formatCounterValue` 会把内置样式或自定义 formatter 应用到数字上：
+
+```ts
+const config = normalizeCounterConfig({ counters: [{ id: "section" }] });
+const roman = formatCounterValue(4, "upper-roman"); // "IV"
+```
+
+该模块还导出更多辅助函数和类型，完整列表见 `src/counter.ts`。
