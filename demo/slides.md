@@ -193,6 +193,59 @@ Next: <Counter id="theorem" action="step" />
 
 <CounterInc id="demoExample" :level="1" />
 
+## <Counter id="demoExample" /> Number styles and starts: config
+
+```ts
+const ticket = (value: number) => `T-${String(value).padStart(4, "0")}`;
+
+const numberStylesCounter = {
+  id: "numberStyles",
+  levels: [
+    { level: 1, format: "%{:value}", start: 0 },
+    { level: 2, format: "%{:value}", style: "decimal-leading-zero" },
+    { level: 3, format: "%{:value}", start: 10, style: "lower-hex" },
+    { level: 4, format: "%{:value}", start: 10, style: "upper-hex" },
+    { level: 5, format: "%{:value}", start: 100, style: ticket },
+  ],
+};
+```
+
+The example keeps the focus on `start` and `style`; the full demo config also
+adds aliases. A `style` can be a built-in name or a synchronous formatter
+function.
+
+`start` is configured per level: it controls the first value, the value shown
+before the first increment, and the value restored after a reset.
+
+---
+
+## <Counter id="demoExample" /> Number styles and starts: usage and output
+
+### Slide source
+
+```md
+Zero-based: <Counter id="numberStyles" level="1" />
+Padded: <Counter id="numberStyles" level="2" />
+Lower hex: <Counter id="numberStyles" level="3" />
+Upper hex: <Counter id="numberStyles" level="4" />
+Custom: <Counter id="numberStyles" level="5" />
+
+Next lower hex: <Counter id="numberStyles" level="3" />
+```
+
+### Rendered
+
+Zero-based: <Counter id="numberStyles" level="1" /><br />
+Padded: <Counter id="numberStyles" level="2" /><br />
+Lower hex: <Counter id="numberStyles" level="3" /><br />
+Upper hex: <Counter id="numberStyles" level="4" /><br />
+Custom: <Counter id="numberStyles" level="5" /><br /><br />
+Next lower hex: <Counter id="numberStyles" level="3" />
+
+---
+
+<CounterInc id="demoExample" :level="1" />
+
 ## <Counter id="demoExample" /> Independent counters: config
 
 ```ts

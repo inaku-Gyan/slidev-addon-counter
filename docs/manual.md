@@ -108,11 +108,11 @@ export default defineCounterConfig({
 
 Each configured counter definition:
 
-| Field          | Type                   | Required | Description                                                                                           |
-| -------------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `id`           | `string`               | Yes      | Counter name. Components reference it through `id`.                                                   |
-| `defaultLevel` | `number \| string`     | No       | Level used when a component omits `level`. Defaults to `1`. Strings must be configured level aliases. |
-| `levels`       | `CounterLevelConfig[]` | No       | Configures selected levels with formats, aliases, styles, and reset rules. Other levels use defaults. |
+| Field          | Type                   | Required | Description                                                                                                   |
+| -------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`           | `string`               | Yes      | Counter name. Components reference it through `id`.                                                           |
+| `defaultLevel` | `number \| string`     | No       | Level used when a component omits `level`. Defaults to `1`. Strings must be configured level aliases.         |
+| `levels`       | `CounterLevelConfig[]` | No       | Configures selected levels with starts, formats, aliases, styles, and reset rules. Other levels use defaults. |
 
 Config `id` must be a non-empty string and cannot be duplicated. This requirement applies to counter definitions in `counters`; component `id` props are optional and default to `"default"`.
 
@@ -120,15 +120,18 @@ Config `id` must be a non-empty string and cannot be duplicated. This requiremen
 
 Each level supports these fields:
 
-| Field    | Type                | Default                                                      | Description                                           |
-| -------- | ------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
-| `level`  | `number`            | None                                                         | Positive integer level, starting from `1`.            |
-| `alias`  | `string`            | None                                                         | Level alias for component props and format refs.      |
-| `style`  | `CounterStyle`      | `"decimal"`                                                  | Number style for this level.                          |
-| `format` | `string`            | level 1: `%{:value}`; deeper levels: `%{@-1:full}.%{:value}` | Full display text for this level.                     |
-| `reset`  | `"lower" \| "none"` | `"lower"`                                                    | Whether incrementing this level resets deeper levels. |
+| Field    | Type                | Default                                                      | Description                                                      |
+| -------- | ------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `level`  | `number`            | None                                                         | Positive integer level, starting from `1`.                       |
+| `alias`  | `string`            | None                                                         | Level alias for component props and format refs.                 |
+| `style`  | `CounterStyle`      | `"decimal"`                                                  | Built-in number style name or a synchronous formatter function.  |
+| `start`  | `number`            | `1`                                                          | First value for this level; must be a non-negative safe integer. |
+| `format` | `string`            | level 1: `%{:value}`; deeper levels: `%{@-1:full}.%{:value}` | Full display text for this level.                                |
+| `reset`  | `"lower" \| "none"` | `"lower"`                                                    | Whether incrementing this level resets deeper levels.            |
 
-Unconfigured levels are still usable. For example, if you only configure level 1, `level={2}` still works and defaults to the `1.1` style.
+Unconfigured levels are still usable. For example, if you only configure level 1, `level={2}` still works and defaults to the `1.1` format. Unconfigured levels use `start: 1`.
+
+`start` is configured independently for each level. It is the value produced by the first `step`, the value shown by `display` before the level has been incremented, and the value restored after a parent reset. `start` also affects `value`, `raw`, and `full` placeholders.
 
 `alias` must be identifier-like, such as `chapter`, `section_2`, or `theorem-main`. It cannot be all digits, start with `@`, or contain `:`.
 
@@ -226,15 +229,48 @@ That also makes it easy to compose directly in headings:
 
 `style` controls how `%{...:value}` is displayed.
 
-| Style         | Example            | Description                                |
-| ------------- | ------------------ | ------------------------------------------ |
-| `decimal`     | `1`, `2`, `12`     | Decimal digits.                            |
-| `zero`        | `01`, `02`, `12`   | At least two digits, padded with zero.     |
-| `lower-alpha` | `a`, `b`, `aa`     | Lowercase alphabetic sequence.             |
-| `upper-alpha` | `A`, `B`, `AA`     | Uppercase alphabetic sequence.             |
-| `lower-roman` | `i`, `ii`, `xiv`   | Lowercase Roman numerals, range `1..3999`. |
-| `upper-roman` | `I`, `II`, `XIV`   | Uppercase Roman numerals, range `1..3999`. |
-| `cjk`         | `一`, `二`, `十二` | Chinese numerals, range `0..9999`.         |
+| Style                  | Example            | Description                                |
+| ---------------------- | ------------------ | ------------------------------------------ |
+| `decimal`              | `1`, `2`, `12`     | Decimal digits.                            |
+| `decimal-leading-zero` | `01`, `02`, `12`   | At least two digits, padded with zero.     |
+| `lower-alpha`          | `a`, `b`, `aa`     | Lowercase alphabetic sequence.             |
+| `upper-alpha`          | `A`, `B`, `AA`     | Uppercase alphabetic sequence.             |
+| `lower-hex`            | `a`, `f`, `10`     | Lowercase hexadecimal digits.              |
+| `upper-hex`            | `A`, `F`, `10`     | Uppercase hexadecimal digits.              |
+| `lower-roman`          | `i`, `ii`, `xiv`   | Lowercase Roman numerals, range `1..3999`. |
+| `upper-roman`          | `I`, `II`, `XIV`   | Uppercase Roman numerals, range `1..3999`. |
+| `cjk`                  | `一`, `二`, `十二` | Chinese numerals, range `0..9999`.         |
+
+`decimal-leading-zero` replaces the old `zero` style name. `lower-hex` and `upper-hex` do not add a `0x` prefix or pad values; add a prefix through `format` when needed, for example `0x%{:value}`.
+
+Styles and starts can be combined independently:
+
+```ts
+levels: [
+  { level: 1, start: 0, style: "decimal" },
+  { level: 2, start: 10, style: "lower-hex", format: "%{:value}" },
+];
+```
+
+The first values are `0` and `a` respectively.
+
+### Custom Formatters
+
+`style` also accepts a synchronous formatter function. It receives the level's logical counter value, including its configured `start`, and returns the display token used by `%{:value}`:
+
+```ts
+levels: [
+  {
+    level: 1,
+    alias: "ticket",
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+    format: "%{:value}",
+  },
+];
+```
+
+The first `step` renders `T-0100`. Formatters run while the addon resolves the counter configuration, not in the browser, so they must be synchronous and must return a string; a non-string return raises an error, while exceptions thrown by the formatter are propagated unchanged. `value` references use the formatter, while `raw` references bypass it and expose the logical value.
 
 Example:
 
@@ -286,7 +322,7 @@ Theorem I
 | Kind    | Example       | Description                                      |
 | ------- | ------------- | ------------------------------------------------ |
 | `value` | `%{:value}`   | Value formatted with the referenced level style. |
-| `raw`   | `%{:raw}`     | Raw numeric value, without `style`.              |
+| `raw`   | `%{:raw}`     | Raw logical numeric value, without `style`.      |
 | `full`  | `%{@-1:full}` | Full `format` output of the referenced level.    |
 
 `full` can only reference shallower levels. It cannot reference the current level or deeper levels because that would be recursive or unstable.
@@ -368,6 +404,8 @@ With `"none"`, deeper-level state is preserved when the current level increments
 ```
 
 Use `"none"` only for cases where child numbering should continue across parent changes. Most chapter and section counters should keep the default `"lower"`.
+
+When a level has a custom `start`, resetting it restores that level's configured start value rather than `1`.
 
 ## Multiple Counters
 
@@ -530,7 +568,9 @@ Levels and aliases cannot be duplicated within the same counter.
 
 `full` cannot reference the current level or deeper levels. In a level 2 `format`, `%{@-1:full}` is valid, but `%{:full}` and `%{@+1:full}` are not.
 
-Roman styles support `1..3999`. CJK style supports `0..9999`. Normal increments do not produce `0`, but `display` can show `0` if the selected level has not been incremented yet.
+`start` must be a non-negative safe integer. Decimal and hexadecimal styles support `0`; alphabetic and Roman styles require positive values, and Roman styles support `1..3999`. CJK style supports `0..9999`. Before the first increment, `display` shows the selected level's configured `start`.
+
+`style` accepts a built-in style name or a synchronous formatter function. Formatters only affect `value` placeholders; `raw` placeholders always use the logical value.
 
 ## Development HMR and Benchmark
 
@@ -552,13 +592,17 @@ Config files can import helpers and types from `slidev-addon-counter/config`:
 ```ts
 import {
   defineCounterConfig,
+  type BuiltinCounterStyle,
   type CounterConfig,
   type CounterDefinition,
+  type CounterFormatter,
   type CounterLevelConfig,
   type CounterReset,
   type CounterStyle,
 } from "slidev-addon-counter/config";
 ```
+
+`CounterStyle` is either a `BuiltinCounterStyle` name or a `CounterFormatter`, where `CounterFormatter` is `(value: number) => string`.
 
 Most configs only need `defineCounterConfig`:
 

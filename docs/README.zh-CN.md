@@ -75,6 +75,25 @@ export default defineCounterConfig({
 当前小节：<CounterDisplay id="section" />
 ```
 
+### 样式和起始值
+
+每个 level 都可以从独立的非负安全整数开始，并使用内置编号样式或自定义 formatter：
+
+```ts
+levels: [
+  { level: 1, start: 0 },
+  { level: 2, start: 10, style: "lower-hex", format: "Hex %{:value}" },
+  { level: 3, style: "decimal-leading-zero" },
+  {
+    level: 4,
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+  },
+];
+```
+
+十六进制样式包括 `lower-hex` 和 `upper-hex`。补零十进制样式名为 `decimal-leading-zero`，会将数值格式化为至少两位。自定义 formatter 会接收当前 level 的逻辑值，并且必须返回字符串；详见[用户手册](./manual.zh-CN.md#自定义-formatter)。
+
 ## 更多示例
 
 [在线示例](https://inaku-Gyan.github.io/slidev-addon-counter/) 中提供了更完整的示例，并把配置、slides 源码和渲染效果放在一起对照展示。

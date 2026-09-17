@@ -3,14 +3,20 @@ import MarkdownIt from "markdown-it";
 
 import { buildCounterTimelineState } from "./counter-timeline";
 
-export type CounterStyle =
+export type BuiltinCounterStyle =
   | "decimal"
-  | "zero"
+  | "decimal-leading-zero"
   | "lower-alpha"
   | "upper-alpha"
+  | "lower-hex"
+  | "upper-hex"
   | "lower-roman"
   | "upper-roman"
   | "cjk";
+
+export type CounterFormatter = (value: number) => string;
+
+export type CounterStyle = BuiltinCounterStyle | CounterFormatter;
 
 export type CounterReset = "lower" | "none";
 export type CounterAction = "step" | "increment" | "display";
@@ -20,6 +26,7 @@ export interface CounterLevelConfig {
   level: number;
   alias?: string;
   style?: CounterStyle;
+  start?: number;
   format?: string;
   reset?: CounterReset;
 }
@@ -37,7 +44,8 @@ export interface CounterConfig {
 export interface NormalizedCounterLevel {
   level: number;
   alias?: string;
-  style: CounterStyle;
+  formatter: CounterFormatter;
+  start: number;
   format: string;
   reset: CounterReset;
 }
@@ -98,15 +106,17 @@ interface HtmlNode {
   startIndex?: number | null;
 }
 
-const BUILTIN_STYLES = new Set<CounterStyle>([
-  "decimal",
-  "zero",
-  "lower-alpha",
-  "upper-alpha",
-  "lower-roman",
-  "upper-roman",
-  "cjk",
-]);
+const BUILTIN_FORMATTERS: Record<BuiltinCounterStyle, CounterFormatter> = {
+  decimal: (value) => String(value),
+  "decimal-leading-zero": (value) => String(value).padStart(2, "0"),
+  "lower-alpha": (value) => toAlphabetic(value),
+  "upper-alpha": (value) => toAlphabetic(value).toUpperCase(),
+  "lower-hex": (value) => toHex(value),
+  "upper-hex": (value) => toHex(value).toUpperCase(),
+  "lower-roman": (value) => toRoman(value),
+  "upper-roman": (value) => toRoman(value).toUpperCase(),
+  cjk: (value) => toCjk(value),
+};
 
 const BUILTIN_RESETS = new Set<CounterReset>(["lower", "none"]);
 const BUILTIN_PLACEHOLDER_KINDS = new Set(["value", "raw", "full"]);
@@ -162,10 +172,13 @@ export function normalizeCounterConfig(
         aliases.set(levelConfig.alias, levelConfig.level);
       }
 
-      const style = levelConfig.style ?? "decimal";
-      if (!BUILTIN_STYLES.has(style)) {
-        throw new Error(`${levelPath}.style "${style}" is not supported.`);
-      }
+      const formatter = resolveFormatter(
+        levelConfig.style ?? "decimal",
+        `${levelPath}.style`,
+      );
+
+      const start = levelConfig.start ?? 1;
+      validateStart(start, `${levelPath}.start`);
 
       const reset = levelConfig.reset ?? "lower";
       if (!BUILTIN_RESETS.has(reset)) {
@@ -175,7 +188,8 @@ export function normalizeCounterConfig(
       levels.set(levelConfig.level, {
         level: levelConfig.level,
         alias: levelConfig.alias,
-        style,
+        formatter,
+        start,
         format: levelConfig.format ?? getDefaultFormat(levelConfig.level),
         reset,
       });
@@ -224,7 +238,8 @@ export function getLevelConfig(
   return (
     counter.levels.get(level) ?? {
       level,
-      style: "decimal",
+      formatter: BUILTIN_FORMATTERS.decimal,
+      start: 1,
       format: getDefaultFormat(level),
       reset: "lower",
     }
@@ -275,25 +290,11 @@ export function formatCounterValue(
   value: number,
   style: CounterStyle = "decimal",
 ): string {
-  if (style === "zero") {
-    return String(value).padStart(2, "0");
-  }
-
-  if (style === "lower-alpha" || style === "upper-alpha") {
-    const alphabetic = toAlphabetic(value);
-    return style === "upper-alpha" ? alphabetic.toUpperCase() : alphabetic;
-  }
-
-  if (style === "lower-roman" || style === "upper-roman") {
-    const roman = toRoman(value);
-    return style === "upper-roman" ? roman.toUpperCase() : roman;
-  }
-
-  if (style === "cjk") {
-    return toCjk(value);
-  }
-
-  return String(value);
+  return invokeFormatter(
+    resolveFormatter(style, "style"),
+    value,
+    "style formatter",
+  );
 }
 
 export function renderCounterFormat(
@@ -498,7 +499,7 @@ function renderFullLevel(context: RenderContext): string {
 
       if (kind === "raw") {
         const level = resolveLevelRef(counter, ref, currentLevel);
-        return String(context.counts[level - 1] ?? 0);
+        return String(getCounterLevelValue(counter, context.counts, level));
       }
 
       if (kind === "full") {
@@ -513,7 +514,19 @@ function renderFullLevel(context: RenderContext): string {
 function renderLevelValue(context: RenderContext, ref: string): string {
   const level = resolveLevelRef(context.counter, ref, context.currentLevel);
   const levelConfig = getLevelConfig(context.counter, level);
-  return formatCounterValue(context.counts[level - 1] ?? 0, levelConfig.style);
+  return invokeFormatter(
+    levelConfig.formatter,
+    getCounterLevelValue(context.counter, context.counts, level),
+    `counter "${context.counter.id}" level ${level} formatter`,
+  );
+}
+
+function getCounterLevelValue(
+  counter: NormalizedCounterDefinition,
+  counts: readonly number[],
+  level: number,
+): number {
+  return counts[level - 1] ?? getLevelConfig(counter, level).start;
 }
 
 function renderRefFull(context: RenderContext, ref: string): string {
@@ -544,6 +557,12 @@ function getDefaultFormat(level: number): string {
 function validateLevel(level: number, label: string): void {
   if (!Number.isInteger(level) || level < 1) {
     throw new Error(`${label} must be a positive integer.`);
+  }
+}
+
+function validateStart(start: number, label: string): void {
+  if (!Number.isSafeInteger(start) || start < 0) {
+    throw new Error(`${label} must be a non-negative safe integer.`);
   }
 }
 
@@ -609,6 +628,34 @@ function parsePlaceholder(
   return { ref, kind };
 }
 
+function resolveFormatter(
+  style: CounterStyle,
+  label: string,
+): CounterFormatter {
+  if (typeof style === "function") {
+    return style;
+  }
+
+  if (!Object.hasOwn(BUILTIN_FORMATTERS, style)) {
+    throw new Error(`${label} "${style}" is not supported.`);
+  }
+
+  return BUILTIN_FORMATTERS[style];
+}
+
+function invokeFormatter(
+  formatter: CounterFormatter,
+  value: number,
+  label: string,
+): string {
+  const formatted = formatter(value);
+  if (typeof formatted !== "string") {
+    throw new Error(`${label} must return a string, got ${typeof formatted}.`);
+  }
+
+  return formatted;
+}
+
 function toAlphabetic(value: number): string {
   if (!Number.isInteger(value) || value < 1) {
     throw new RangeError(
@@ -626,6 +673,16 @@ function toAlphabetic(value: number): string {
   }
 
   return result;
+}
+
+function toHex(value: number): string {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new RangeError(
+      `Hexadecimal counter value must be a non-negative safe integer, got ${value}.`,
+    );
+  }
+
+  return value.toString(16);
 }
 
 function toRoman(value: number): string {

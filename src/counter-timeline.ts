@@ -83,12 +83,23 @@ export function buildCounterTimelineState(
 
       if (operation.action === "step" || operation.action === "increment") {
         for (let index = 0; index < level - 1; index += 1) {
-          counts[index] ??= 0;
+          counts[index] ??= getLevelConfig(counter, index + 1).start;
         }
 
-        counts[level - 1] = (counts[level - 1] ?? 0) + 1;
+        const levelConfig = getLevelConfig(counter, level);
+        const currentValue = counts[level - 1];
+        const nextValue =
+          currentValue == null ? levelConfig.start : currentValue + 1;
 
-        if (getLevelConfig(counter, level).reset === "lower") {
+        if (!Number.isSafeInteger(nextValue)) {
+          throw new RangeError(
+            `Counter "${counter.id}" level ${level} exceeded the maximum safe integer value.`,
+          );
+        }
+
+        counts[level - 1] = nextValue;
+
+        if (levelConfig.reset === "lower") {
           counts.length = level;
         }
 

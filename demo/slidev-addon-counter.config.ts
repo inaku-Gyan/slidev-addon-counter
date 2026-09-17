@@ -65,6 +65,44 @@ export default defineCounterConfig({
       ],
     },
     {
+      id: "numberStyles",
+      levels: [
+        {
+          level: 1,
+          alias: "zeroBased",
+          start: 0,
+          format: "%{:value}",
+        },
+        {
+          level: 2,
+          alias: "padded",
+          style: "decimal-leading-zero",
+          format: "%{:value}",
+        },
+        {
+          level: 3,
+          alias: "lowerHex",
+          start: 10,
+          style: "lower-hex",
+          format: "%{:value}",
+        },
+        {
+          level: 4,
+          alias: "upperHex",
+          start: 10,
+          style: "upper-hex",
+          format: "%{:value}",
+        },
+        {
+          level: 5,
+          alias: "ticket",
+          start: 100,
+          style: (value) => `T-${String(value).padStart(4, "0")}`,
+          format: "%{:value}",
+        },
+      ],
+    },
+    {
       id: "taskFlow",
       defaultLevel: "task",
       levels: [

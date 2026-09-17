@@ -108,11 +108,11 @@ export default defineCounterConfig({
 
 每个已配置的 counter 定义：
 
-| 字段           | 类型                   | 必填 | 说明                                                                    |
-| -------------- | ---------------------- | ---- | ----------------------------------------------------------------------- |
-| `id`           | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                    |
-| `defaultLevel` | `number \| string`     | 否   | 组件省略 `level` 时使用的层级，默认是 `1`。字符串必须是已配置的 alias。 |
-| `levels`       | `CounterLevelConfig[]` | 否   | 指定某些层级的格式、别名、样式和重置规则。未声明的层级使用默认规则。    |
+| 字段           | 类型                   | 必填 | 说明                                                                         |
+| -------------- | ---------------------- | ---- | ---------------------------------------------------------------------------- |
+| `id`           | `string`               | 是   | counter 名称。组件通过 `id` 引用它。                                         |
+| `defaultLevel` | `number \| string`     | 否   | 组件省略 `level` 时使用的层级，默认是 `1`。字符串必须是已配置的 alias。      |
+| `levels`       | `CounterLevelConfig[]` | 否   | 指定某些层级的起始值、格式、别名、样式和重置规则。未声明的层级使用默认规则。 |
 
 配置里的 `id` 必须是非空字符串，不能重复。这个要求只适用于 `counters` 里的 counter 定义；组件的 `id` prop 是可选的，默认值为 `"default"`。
 
@@ -120,15 +120,18 @@ export default defineCounterConfig({
 
 每个 level 支持这些字段：
 
-| 字段     | 类型                | 默认值                                                   | 说明                                 |
-| -------- | ------------------- | -------------------------------------------------------- | ------------------------------------ |
-| `level`  | `number`            | 无                                                       | 正整数层级，从 `1` 开始。            |
-| `alias`  | `string`            | 无                                                       | 层级别名，可在组件和格式引用中使用。 |
-| `style`  | `CounterStyle`      | `"decimal"`                                              | 当前层级的编号样式。                 |
-| `format` | `string`            | level 1 为 `%{:value}`，更深层为 `%{@-1:full}.%{:value}` | 当前层级完整显示文本。               |
-| `reset`  | `"lower" \| "none"` | `"lower"`                                                | 当前层级递增后是否重置更深层级。     |
+| 字段     | 类型                | 默认值                                                   | 说明                                      |
+| -------- | ------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| `level`  | `number`            | 无                                                       | 正整数层级，从 `1` 开始。                 |
+| `alias`  | `string`            | 无                                                       | 层级别名，可在组件和格式引用中使用。      |
+| `style`  | `CounterStyle`      | `"decimal"`                                              | 内置编号样式名称，或同步 formatter 函数。 |
+| `start`  | `number`            | `1`                                                      | 当前层级的第一个值，必须是非负安全整数。  |
+| `format` | `string`            | level 1 为 `%{:value}`，更深层为 `%{@-1:full}.%{:value}` | 当前层级完整显示文本。                    |
+| `reset`  | `"lower" \| "none"` | `"lower"`                                                | 当前层级递增后是否重置更深层级。          |
 
-未声明的 level 仍然可用，会使用默认配置。例如只声明 level 1 后，仍然可以使用 `level={2}`，显示格式默认为 `1.1`。
+未声明的 level 仍然可用，会使用默认配置。例如只声明 level 1 后，仍然可以使用 `level={2}`，显示格式默认为 `1.1`。未声明的 level 使用 `start: 1`。
+
+`start` 可以为每个 level 单独配置。它表示该 level 第一次 `step` 产生的值、尚未递增时 `display` 显示的值，以及父级重置后恢复的值。`start` 也会影响 `value`、`raw` 和 `full` 占位符。
 
 `alias` 必须类似标识符，例如 `chapter`、`section_2`、`theorem-main`。不能使用纯数字、`@` 开头的字符串或包含 `:` 的字符串。
 
@@ -226,15 +229,48 @@ Props：
 
 `style` 控制 `%{...:value}` 的显示方式。
 
-| style         | 示例               | 说明                           |
-| ------------- | ------------------ | ------------------------------ |
-| `decimal`     | `1`, `2`, `12`     | 十进制数字。                   |
-| `zero`        | `01`, `02`, `12`   | 至少两位，不足补零。           |
-| `lower-alpha` | `a`, `b`, `aa`     | 小写字母序号。                 |
-| `upper-alpha` | `A`, `B`, `AA`     | 大写字母序号。                 |
-| `lower-roman` | `i`, `ii`, `xiv`   | 小写罗马数字，范围 `1..3999`。 |
-| `upper-roman` | `I`, `II`, `XIV`   | 大写罗马数字，范围 `1..3999`。 |
-| `cjk`         | `一`, `二`, `十二` | 中文数字，范围 `0..9999`。     |
+| style                  | 示例               | 说明                           |
+| ---------------------- | ------------------ | ------------------------------ |
+| `decimal`              | `1`, `2`, `12`     | 十进制数字。                   |
+| `decimal-leading-zero` | `01`, `02`, `12`   | 至少两位，不足补零。           |
+| `lower-alpha`          | `a`, `b`, `aa`     | 小写字母序号。                 |
+| `upper-alpha`          | `A`, `B`, `AA`     | 大写字母序号。                 |
+| `lower-hex`            | `a`, `f`, `10`     | 小写十六进制数字。             |
+| `upper-hex`            | `A`, `F`, `10`     | 大写十六进制数字。             |
+| `lower-roman`          | `i`, `ii`, `xiv`   | 小写罗马数字，范围 `1..3999`。 |
+| `upper-roman`          | `I`, `II`, `XIV`   | 大写罗马数字，范围 `1..3999`。 |
+| `cjk`                  | `一`, `二`, `十二` | 中文数字，范围 `0..9999`。     |
+
+`decimal-leading-zero` 是旧 `zero` 样式的新名称。`lower-hex` 和 `upper-hex` 不会添加 `0x` 前缀，也不会补零；需要前缀时可以在 `format` 中添加，例如 `0x%{:value}`。
+
+样式和起始值可以独立组合：
+
+```ts
+levels: [
+  { level: 1, start: 0, style: "decimal" },
+  { level: 2, start: 10, style: "lower-hex", format: "%{:value}" },
+];
+```
+
+它们的第一个值分别是 `0` 和 `a`。
+
+### 自定义 formatter
+
+`style` 也可以接受一个同步 formatter 函数。它会接收当前 level 的逻辑计数值（包含配置的 `start`），并返回 `%{:value}` 使用的显示文本：
+
+```ts
+levels: [
+  {
+    level: 1,
+    alias: "ticket",
+    start: 100,
+    style: (value) => `T-${String(value).padStart(4, "0")}`,
+    format: "%{:value}",
+  },
+];
+```
+
+第一次 `step` 会显示 `T-0100`。formatter 在插件解析 counter 配置时运行，不在浏览器中运行，因此必须是同步函数并且返回字符串；返回非字符串会报错，而 formatter 自身抛出的异常会原样保留。`value` 占位符会使用 formatter，`raw` 占位符会绕过 formatter，直接使用逻辑值。
 
 示例：
 
@@ -286,7 +322,7 @@ Theorem I
 | kind    | 示例          | 说明                                  |
 | ------- | ------------- | ------------------------------------- |
 | `value` | `%{:value}`   | 按被引用层级的 `style` 格式化后的值。 |
-| `raw`   | `%{:raw}`     | 原始数字值，不使用 `style`。          |
+| `raw`   | `%{:raw}`     | 原始逻辑数字值，不使用 `style`。      |
 | `full`  | `%{@-1:full}` | 被引用层级的完整 `format` 输出。      |
 
 `full` 只能引用更浅层级，不能引用当前层级或更深层级，否则会形成递归或不稳定格式。
@@ -368,6 +404,8 @@ level 2+: %{@-1:full}.%{:value}
 ```
 
 这适合少数需要跨父级延续子编号的场景。大多数章节、小节编号应使用默认的 `"lower"`。
+
+如果某个 level 配置了自定义 `start`，重置时会恢复该 level 的起始值，而不是固定恢复为 `1`。
 
 ## 多个 counter
 
@@ -530,7 +568,9 @@ counter `id` 必须已经在配置中定义。唯一例外是 `default`，插件
 
 `full` 不能引用当前层级或更深层级。例如 level 2 的 `format` 中可以使用 `%{@-1:full}`，但不能使用 `%{:full}` 或 `%{@+1:full}`。
 
-Roman 样式只支持 `1..3999`。CJK 样式支持 `0..9999`。正常递增不会产生 `0`，但 `display` 在尚未递增时可能显示当前层级的 `0`。
+`start` 必须是非负安全整数。十进制和十六进制样式支持 `0`；字母和罗马数字样式要求正数，罗马数字范围为 `1..3999`。CJK 样式支持 `0..9999`。第一次递增前，`display` 会显示所选 level 配置的 `start`。
+
+`style` 可以接受内置样式名称或同步 formatter 函数。formatter 只影响 `value` 占位符；`raw` 占位符始终使用逻辑值。
 
 ## 开发环境 HMR 和 benchmark
 
@@ -552,13 +592,17 @@ benchmark 使用仅开发态的渲染标记，不会改变插件公开的组件 
 ```ts
 import {
   defineCounterConfig,
+  type BuiltinCounterStyle,
   type CounterConfig,
   type CounterDefinition,
+  type CounterFormatter,
   type CounterLevelConfig,
   type CounterReset,
   type CounterStyle,
 } from "slidev-addon-counter/config";
 ```
+
+`CounterStyle` 可以是内置的 `BuiltinCounterStyle` 名称，也可以是 `CounterFormatter`；其中 `CounterFormatter` 的类型是 `(value: number) => string`。
 
 通常只需要使用 `defineCounterConfig`：
 
